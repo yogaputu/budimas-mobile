@@ -167,6 +167,7 @@ const routes = [
     component: PaymentHistory,
     meta: { requiresAuth: true }
   },
+  { path: '/lph-kuitansi', name: 'ReceiptLph', component: () => import('@/views/ReceiptLphPage.vue'), meta: { requiresAuth: true } },
   {
     path: '/lph',
     name: 'Lph',

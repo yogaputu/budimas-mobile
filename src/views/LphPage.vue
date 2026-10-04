@@ -14,6 +14,7 @@
       </button>
     </header>
 
+    <button class="accept-action" type="button" @click="router.push('/lph-kuitansi')">LPH & Klaim Pembayaran (Kuitansi)</button>
     <section class="guide-card">
       <div class="guide-step">
         <span>1</span>
@@ -185,8 +186,12 @@ const loadLph = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    const response = await api.get('/api/lph');
-    rows.value = normalizeRows(response.data);
+    const [response, workflow] = await Promise.all([
+      api.get('/api/lph'),
+      api.get('/api/mobile/workflow/lphs').catch(error => { if (error?.response?.status === 404) return { data:{ data:[] } }; throw error; })
+    ]);
+    const receiptIds = new Set((workflow.data?.data || []).map(row => Number(row.id)));
+    rows.value = normalizeRows(response.data).filter(row => Number(row.payment_workflow_version || 1) !== 2 && !receiptIds.has(row.id_lph));
   } catch (error) {
     rows.value = [];
     errorMessage.value = error?.response?.data?.message || error?.message || 'Daftar LPH belum dapat dimuat.';

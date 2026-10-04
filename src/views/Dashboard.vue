@@ -167,6 +167,10 @@
             </div>
             <span>Riwayat</span>
           </div>
+          <div class="sub-item" @click="router.push('/lph-kuitansi')">
+            <div class="si-icon b-blue"><font-awesome-icon icon="clipboard-check" /></div>
+            <span>LPH & Klaim Pembayaran</span>
+          </div>
           <div class="sub-item" @click="router.push('/lph')">
             <div class="si-icon b-blue">
               <font-awesome-icon icon="clipboard-check" />

@@ -14,6 +14,7 @@
       </div>
 
       <main class="scroll-area">
+        <div class="lph-empty-hint"><p>Untuk LPH Kuitansi, catat klaim di menu baru.</p><button type="button" @click="router.push('/lph-kuitansi')">LPH & Klaim Pembayaran</button></div>
         <div v-if="loadingTagihan" class="state-container">
           <div class="loader-enterprise"></div>
           <p>{{ isOffline ? 'Memuat cache tagihan...' : 'Memuat tagihan...' }}</p>
