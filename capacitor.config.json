@@ -1,0 +1,25 @@
+{
+  "appId": "com.budimas.app",
+	"appName": "Budimas Mobile",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true,
+    "allowNavigation": ["erp.budimas.swakarya.my.id"]
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#0f172a",
+      "androidScaleType": "CENTER_INSIDE",
+      "showSpinner": true,
+      "androidSpinnerStyle": "large",
+      "spinnerColor": "#3b82f6",
+      "androidSplashResourceName": "logo_budimas",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  }
+}
