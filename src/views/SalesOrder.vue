@@ -22,6 +22,7 @@
         </button>
       </header>
 
+      <div v-if="customerContextMessage" class="offline-banner" role="status">{{ customerContextMessage }}</div>
       <div v-if="isOffline" class="offline-banner">
         <span class="offline-dot"></span>
         MODE OFFLINE AKTIF - order akan masuk antrean lokal
@@ -102,6 +103,9 @@
                   :class="['rule-chip', isForbiddenOrder(item) ? 'rule-chip-forbidden' : 'rule-chip-required']"
                 >
                   {{ getCustomerRuleLabel(item) }}
+                </span>
+                <span v-if="item.StokReady != null" class="stock-chip">
+                  Stok Ready {{ formatNumber(item.StokReady) }} PCS
                 </span>
                 <span v-if="Number(item.StokAkhir) > 0" class="stock-chip">
                   Stok toko {{ Math.floor(Number(item.StokAkhir) || 0) }}
@@ -259,22 +263,22 @@
           <div class="two-col-info">
             <div class="info-card">
               <span>Sisa Plafon</span>
-              <strong>Rp {{ formatNumber(customerData.SisaPlafon) }}</strong>
+              <strong>{{ liveCustomerContext ? `Rp ${formatNumber(customerData.SisaPlafon)}` : "Belum dimuat" }}</strong>
             </div>
             <div class="info-card">
-              <span>Piutang</span>
-              <strong>Rp {{ formatNumber(customerData.Piutang) }}</strong>
+              <span>Sisa Piutang</span>
+              <strong>{{ liveCustomerContext ? `Rp ${formatNumber(customerData.Piutang)}` : "Belum dimuat" }}</strong>
             </div>
           </div>
 
           <div class="two-col-info">
             <div class="info-card">
               <span>Jatuh Tempo</span>
-              <strong>{{ formatDisplayDate(jatuhTempo) }}</strong>
+              <strong>{{ liveCustomerContext ? formatDisplayDate(jatuhTempo) : "Belum dimuat" }}</strong>
             </div>
             <div class="info-card">
-              <span>TOP</span>
-              <strong>{{ termDays }} hari</strong>
+              <span>Tempo Pembayaran</span>
+              <strong>{{ liveCustomerContext ? `${termDays} hari` : "Belum dimuat" }}</strong>
             </div>
           </div>
 
@@ -415,6 +419,10 @@
           <div class="detail-box">
             <span>Saran</span>
             <strong>{{ formatNumber(selectedItemDetail.stok?.Suggestion || 0) }}</strong>
+          </div>
+          <div class="detail-box">
+            <span>Stok Ready Gudang (PCS)</span>
+            <strong>{{ selectedItemDetail.stok?.StokReady != null ? formatNumber(selectedItemDetail.stok.StokReady) : "Belum dimuat" }}</strong>
           </div>
           <div class="detail-box">
             <span>Stok toko</span>
@@ -586,6 +594,8 @@ maxDateObj.setDate(today.getDate() + 30);
 const minTanggal = toLocalDateInputValue(minDateObj);
 const maxTanggal = toLocalDateInputValue(maxDateObj);
 
+const liveCustomerContext = ref(null);
+const customerContextMessage = ref('');
 const customerData = computed(() => ({
   Kode: route.query.kode_customer || '',
   Nama: route.query.nama_toko || 'Pelanggan',
@@ -597,15 +607,35 @@ const customerData = computed(() => ({
   Piutang: Number(route.query.piutang || 0),
   TermOfPayment: Number(route.query.term_of_payment || 14),
   PlafonTerm: Number(route.query.plafon_term || 0),
-  Plafon: Number(route.query.plafon || 0)
+  Plafon: Number(route.query.plafon || 0),
+  ...(liveCustomerContext.value || {})
 }));
 
-const termDays = computed(() => {
-  if (Number(customerData.value.Plafon || 0) === 0) {
-    return Number(customerData.value.TermOfPayment || 14);
+const termDays = computed(() => Number(customerData.value.PlafonTerm ?? 0));
+
+const refreshCustomerContext = async () => {
+  const cacheKey = `order-context:${customerData.value.id_plafon}:${customerData.value.Kode}`;
+  if (isOffline.value) {
+    try { liveCustomerContext.value = JSON.parse(localStorage.getItem(cacheKey) || 'null'); } catch { /* No usable cache. */ }
+    customerContextMessage.value = liveCustomerContext.value
+      ? 'Offline: informasi plafon memakai data terakhir yang tersimpan.'
+      : 'Offline: informasi plafon belum tersimpan. Hubungkan internet untuk memuat master terbaru.';
+    return;
   }
-  return Number(customerData.value.PlafonTerm || 0);
-});
+  try {
+    const response = await api.get('/api/customer/order-context', { params: {
+      id_plafon: route.query.id_plafon || undefined,
+      kode_customer: route.query.kode_customer || undefined,
+      id_kunjungan: route.query.id_kunjungan || undefined
+    }});
+    liveCustomerContext.value = response.data;
+    customerContextMessage.value = '';
+    try { localStorage.setItem(cacheKey, JSON.stringify(response.data)); } catch { /* Cache is optional. */ }
+  } catch (error) {
+    liveCustomerContext.value = null;
+    customerContextMessage.value = error.response?.data?.message || 'Informasi plafon terbaru belum dapat dimuat.';
+  }
+};
 
 const jatuhTempo = computed(() => {
   if (!tanggalTransaksi.value) return '';
@@ -800,9 +830,11 @@ const formatEntryUomSummary = (entry) => {
 
 const getStockAvailability = (entry) => {
   // StokAkhir is the shop's opname/history, not warehouse inventory.  Only
-  // raise an order-stock warning when the API supplied an authoritative WMS
-  // fixed/aisle balance for the selected branch.
+  // raise an order-stock warning using the warehouse report transaction
+  // balance for the selected branch.
   const rawValue = (
+    entry?.stok?.StokReady ??
+    entry?.stok?.stok_ready ??
     entry?.stok?.StokWmsReady ??
     entry?.stok?.stok_wms_ready ??
     entry?.stok?.wms_ready_quantity ??
@@ -2384,7 +2416,10 @@ const handleResize = () => {
   updateMaxSlide();
 };
 
+watch(isOffline, (offline) => { if (!offline) refreshCustomerContext(); });
+
 onMounted(async () => {
+  await refreshCustomerContext();
   await restoreCartDraft();
   await restoreMetaDraft();
   await refreshPendingCount();
