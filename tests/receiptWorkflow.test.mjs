@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkedDetailIds, cashHandover, claimPayload, amountCents, workflowVersion, workflowError } from '../src/utils/receiptWorkflow.js';
+import { checkedDetailIds, cashHandover, collectionSummary, claimPayload, amountCents, workflowVersion, workflowError } from '../src/utils/receiptWorkflow.js';
 const detail = {status_dokumen:'AKTIF',invoices:[{id:7,remaining:'1000.00'}],claims:[{id_faktur:7,method:'CASH',amount:'250.25'}],checked_details:[{id:11,id_faktur:7},{id:12,id_faktur:7}]};
 const form = {id_faktur:7,method:'CASH',amount:'749.75',giro_number:'',bank:'',due_date:''};
 test('acceptance checks parent invoices and sends every printed detail ID',()=>{assert.deepEqual(checkedDetailIds(detail,[7]),[11,12]);assert.throws(()=>checkedDetailIds(detail,[]));});
@@ -9,3 +9,4 @@ test('claim requires active document and valid positive precise money',()=>{asse
 test('giro metadata required; cash never retains hidden giro data',()=>{assert.throws(()=>claimPayload({...form,method:'GIRO'},detail,'uuid'));assert.equal(claimPayload({...form,giro_number:'stale'},detail,'uuid').giro_number,'');assert.equal(claimPayload({...form,method:'GIRO',giro_number:'BG1',bank:'Bank',due_date:'2026-10-31'},detail,'uuid').bank,'Bank');});
 test('cash split excludes transfer/giro and stays exact to cents',()=>{assert.deepEqual(cashHandover([...detail.claims,{method:'GIRO',amount:999}], '0.29'),{cash_transfer:.29,cash_to_cashier:249.96});assert.throws(()=>cashHandover(detail.claims,'251'));});
 test('legacy workflow remains version1 and API errors remain visible',()=>{assert.equal(workflowVersion({}),1);assert.equal(workflowVersion({payment_workflow_version:2}),2);assert.equal(workflowError({response:{data:{result:[{message:'LPH sudah ditutup'}]}}}),'LPH sudah ditutup');});
+test('return summary separates cash transfer giro and total with exact cents',()=>{assert.deepEqual(collectionSummary([{method:'CASH',amount:'100.10'},{method:'TRANSFER',amount:'50.20'},{method:'GIRO',amount:'25.30'},{method:'CASH',amount:'0.20'}]),{cash:100.3,transfer:50.2,giro:25.3,total:175.8});assert.deepEqual(collectionSummary(),{cash:0,transfer:0,giro:0,total:0});});

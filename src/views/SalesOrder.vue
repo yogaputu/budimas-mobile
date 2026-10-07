@@ -266,7 +266,7 @@
               <strong>{{ liveCustomerContext ? `Rp ${formatNumber(customerData.SisaPlafon)}` : "Belum dimuat" }}</strong>
             </div>
             <div class="info-card">
-              <span>Sisa Piutang</span>
+              <span>{{ customerData.piutang_scope === 'customer_company' ? 'Sisa Piutang Customer (Perusahaan)' : 'Sisa Piutang' }}</span>
               <strong>{{ liveCustomerContext ? `Rp ${formatNumber(customerData.Piutang)}` : "Belum dimuat" }}</strong>
             </div>
           </div>
@@ -4084,5 +4084,4 @@ body[data-theme='dark'] .swal-stock-warning small {
   opacity: 1 !important;
 }
 </style>
-
 

@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axios';
 import { useConnectivityStore } from '@/stores/connectivity';
-import { checkedDetailIds, cashHandover, claimPayload, workflowError } from '@/utils/receiptWorkflow';
+import { checkedDetailIds, cashHandover, collectionSummary, claimPayload, workflowError } from '@/utils/receiptWorkflow';
 const router = useRouter(), network = useConnectivityStore();
 const rows = ref([]), detail = ref(null), busy = ref(false), error = ref(''), success = ref(''), checked = ref([]), transfer = ref('0'), returning = ref(false);
 const form = reactive({ id_faktur:'', method:'CASH', amount:'', giro_number:'', bank:'', due_date:'' });
@@ -12,6 +12,7 @@ const labels = { MENUNGGU_PENERIMAAN:'Menunggu diterima', AKTIF:'Aktif', DIKEMBA
 const money = value => new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR' }).format(Number(value || 0));
 const date = value => value ? new Date(value).toLocaleDateString('id-ID') : '—';
 const split = computed(() => { try { return cashHandover(detail.value?.claims || [], transfer.value); } catch { return null; } });
+const collection = computed(() => collectionSummary(detail.value?.claims || []));
 const allChecked = computed(() => detail.value?.invoices?.length && detail.value.invoices.every(i => checked.value.includes(i.id)));
 const remainingClaim = computed(() => { const invoice = detail.value?.invoices.find(i => String(i.id) === String(form.id_faktur)); return invoice ? Number(invoice.remaining) - detail.value.claims.filter(c => c.id_faktur === invoice.id).reduce((s,c) => s + Number(c.amount),0) : 0; });
 watch(() => JSON.stringify(form), () => { claimKey.value = null; claimFingerprint.value = null; });
@@ -27,7 +28,7 @@ async function open(row) {
   if (busy.value) return;
   busy.value = true; error.value = ''; success.value = ''; checked.value = []; returning.value = false; transfer.value = '0'; detail.value = null;
   Object.assign(form,{ id_faktur:'', method:'CASH', amount:'', giro_number:'', bank:'', due_date:'' });
-  try { await fetchDetail(row.id); }
+  try { await fetchDetail(row.id); checked.value = detail.value.invoices.map(i => i.id); }
   catch(e) { error.value = workflowError(e); }
   finally { busy.value = false; }
 }
@@ -93,7 +94,9 @@ onMounted(load);
           <button type="submit">Simpan Klaim</button>
         </fieldset>
       </form>
-      <h3>Klaim tercatat</h3><article v-for="claim in detail.claims" :key="claim.id" class="invoice"><span>{{ detail.invoices.find(i => i.id === claim.id_faktur)?.no_faktur }} · {{ labels[claim.method] }}<br/><b>{{ money(claim.amount) }}</b><template v-if="claim.method === 'GIRO'"><br/>{{ claim.giro_number }} · {{ claim.bank }} · {{ date(claim.due_date) }}</template></span><button v-if="detail.status_dokumen === 'AKTIF'" :disabled="busy || !network.isOnline" @click="removeClaim(claim)">Hapus</button></article>
+      <h3>Klaim tercatat</h3>
+      <dl class="collection-summary" aria-label="Ringkasan penerimaan Sales"><div><dt>Total Uang Diperoleh</dt><dd>{{ money(collection.total) }}</dd></div><div><dt>Tunai</dt><dd>{{ money(collection.cash) }}</dd></div><div><dt>Transfer</dt><dd>{{ money(collection.transfer) }}</dd></div><div><dt>Giro</dt><dd>{{ money(collection.giro) }}</dd></div></dl>
+      <article v-for="claim in detail.claims" :key="claim.id" class="invoice"><span>{{ detail.invoices.find(i => i.id === claim.id_faktur)?.no_faktur }} · {{ labels[claim.method] }}<br/><b>{{ money(claim.amount) }}</b><template v-if="claim.method === 'GIRO'"><br/>{{ claim.giro_number }} · {{ claim.bank }} · {{ date(claim.due_date) }}</template></span><button v-if="detail.status_dokumen === 'AKTIF'" :disabled="busy || !network.isOnline" @click="removeClaim(claim)">Hapus</button></article>
       <button v-if="detail.status_dokumen === 'AKTIF' && !returning" :disabled="busy || !network.isOnline" @click="returning = true">Kembalikan LPH</button>
       <form v-if="returning && detail.status_dokumen === 'AKTIF'" @submit.prevent="submitReturn"><h3>Konfirmasi pengembalian LPH</h3><fieldset :disabled="busy || !network.isOnline"><label>Bagian cash yang ditransfer (Rp)<input v-model="transfer" type="number" min="0" step="0.01" inputmode="decimal" required/></label><p v-if="split">Cash diserahkan ke Kasir: <b>{{ money(split.cash_to_cashier) }}</b></p><p v-else class="error">Nominal transfer harus valid dan tidak melebihi klaim tunai.</p><p>Sesudah dikembalikan, klaim tidak dapat diubah. Sisa cash dibuat sebagai setoran menunggu approval Kasir.</p><button :disabled="!split" type="submit">Konfirmasi Pengembalian</button><button type="button" @click="returning = false">Batal</button></fieldset></form>
       <p v-if="detail.handover">Cash ditransfer: {{ money(detail.handover.cash_transfer) }} · Cash ke Kasir: {{ money(detail.handover.cash_to_cashier) }}</p>
@@ -102,5 +105,6 @@ onMounted(load);
 </template>
 
 <style scoped>
+.collection-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.collection-summary div{padding:12px;border:1px solid #94a3b8;border-radius:10px}.collection-summary dt{font-size:.8rem;opacity:.8}.collection-summary dd{margin:6px 0 0;font-weight:700}
 .receipt-lph,.receipt-lph *{box-sizing:border-box;min-width:0;overflow-wrap:anywhere}.receipt-lph{max-width:720px;margin:auto;padding:18px 14px 90px;color:var(--app-body-text,#172b4d);text-align:left}header{display:flex;flex-wrap:wrap;align-items:center;gap:12px}h1{font-size:1.3rem;flex:1}h2{font-size:1.15rem}.cards{display:grid;gap:12px}.card{display:block;text-align:left;width:100%;border:1px solid #94a3b8;border-radius:14px;padding:16px;margin:14px 0;background:var(--app-surface,#fff)}.card>span,.card>small{display:block;margin-top:8px}button{padding:12px;border:1px solid #94a3b8;border-radius:10px;background:var(--app-surface,#fff);color:inherit;cursor:pointer}button:disabled{opacity:.5;cursor:default}fieldset{border:0;padding:0;margin:14px 0}label{display:block;margin:12px 0}input:not([type=checkbox]),select{display:block;width:100%;box-sizing:border-box;padding:12px;margin-top:7px;border:1px solid #94a3b8;border-radius:9px;background:var(--app-surface,#fff);color:inherit;font:inherit}.invoice{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #cbd5e1;padding:14px 0}.invoice input{min-width:20px;min-height:20px}.error,.warning{background:#fff2e8;color:#9a3412;padding:12px;border-radius:9px}.success{background:#dcfce7;color:#166534;padding:12px;border-radius:9px}form{margin-top:24px}form button{margin:6px 6px 6px 0}h3{margin-top:24px}legend{font-weight:bold}
 </style>

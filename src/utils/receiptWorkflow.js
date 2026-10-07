@@ -19,6 +19,12 @@ export function cashHandover(claims, transfer) {
   if (converted > total) throw new Error('Cash yang ditransfer melebihi klaim tunai.');
   return { cash_transfer: converted / 100, cash_to_cashier: (total - converted) / 100 };
 }
+export function collectionSummary(claims = []) {
+  const cents = { CASH: 0, TRANSFER: 0, GIRO: 0 };
+  for (const claim of claims) if (claim.method in cents) cents[claim.method] += amountCents(claim.amount);
+  return { cash:cents.CASH / 100, transfer:cents.TRANSFER / 100, giro:cents.GIRO / 100,
+    total:(cents.CASH + cents.TRANSFER + cents.GIRO) / 100 };
+}
 export function claimPayload(form, detail, clientKey) {
   const invoice = detail.invoices.find(i => String(i.id) === String(form.id_faktur));
   if (!invoice || detail.status_dokumen !== 'AKTIF') throw new Error('Pilih faktur pada LPH aktif.');

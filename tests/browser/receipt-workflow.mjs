@@ -28,6 +28,8 @@ try {
  });
  await page.goto(origin+'/lph-kuitansi');
  await page.getByRole('button',{name:/LPH-TEST/}).click();
+ assert.equal(await page.getByRole('button',{name:'Terima LPH',exact:true}).isDisabled(),false);
+ await page.locator('input[type=checkbox]').uncheck();
  assert.equal(await page.getByRole('button',{name:'Terima LPH',exact:true}).isDisabled(),true);
  await page.locator('input[type=checkbox]').check();
  await page.getByRole('button',{name:'Terima LPH',exact:true}).click();
@@ -36,7 +38,10 @@ try {
  await page.getByRole('button',{name:'Simpan Klaim',exact:true}).click();
  await page.getByRole('status').filter({hasText:'Klaim tercatat'}).waitFor();
  await page.getByRole('button',{name:'Kembalikan LPH',exact:true}).click();
+ await page.getByRole('definition').filter({hasText:/1\.000/}).first().waitFor();
+ await page.getByText('Total Uang Diperoleh',{exact:true}).waitFor();
  await page.getByLabel('Bagian cash yang ditransfer (Rp)',{exact:true}).fill('250');
+ await page.screenshot({path:process.env.PAYMENT_MOBILE_SCREENSHOT || '/tmp/budimas-payment-demo-mobile.png',fullPage:true});
  await page.getByRole('button',{name:'Konfirmasi Pengembalian',exact:true}).click();
  await page.getByRole('status').filter({hasText:'LPH dikembalikan'}).waitFor();
  assert.equal(writes.length,3);assert.deepEqual(errors,[]);
