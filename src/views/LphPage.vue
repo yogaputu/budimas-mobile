@@ -1,20 +1,20 @@
 <template>
-  <main class="lph-page">
-    <header class="page-header">
+  <main class="lph-page sales-ui sales-document-page">
+    <header class="page-header sales-header">
       <button class="back-button" type="button" aria-label="Kembali" @click="router.back()">
         <font-awesome-icon icon="chevron-left" />
       </button>
       <div class="header-copy">
-        <p class="eyebrow">Dokumen Penagihan</p>
-        <h1>LPH Saya</h1>
+        <p class="eyebrow">Dokumen Alur Sebelumnya</p>
+        <h1>LPH Sebelumnya</h1>
         <p>Terima LPH sebelum faktur dapat dipakai pada menu Pembayaran.</p>
       </div>
-      <button class="refresh-button" type="button" :disabled="loading || submittingId !== null" @click="loadLph">
+      <button class="refresh-button" type="button" aria-label="Muat ulang" :disabled="loading || submittingId !== null" @click="loadLph">
         <font-awesome-icon :icon="loading ? 'sync-alt' : 'rotate-right'" :class="{ spinning: loading }" />
       </button>
     </header>
 
-    <button class="accept-action" type="button" @click="router.push('/lph-kuitansi')">LPH & Klaim Pembayaran (Kuitansi)</button>
+    <button class="workflow-entry" type="button" @click="router.push('/lph-kuitansi')"><font-awesome-icon icon="clipboard-check" /><span><strong>LPH & Klaim Pembayaran</strong><small>Buka alur Kuitansi & Giro</small></span><font-awesome-icon icon="chevron-right" /></button>
     <section class="guide-card">
       <div class="guide-step">
         <span>1</span>

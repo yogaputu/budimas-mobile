@@ -3,6 +3,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import './style.css';
+import './styles/sales-ui.css';
 import { initDatabase } from '@/services/database';
 import { useThemeStore } from '@/stores/theme';
 import { offlineEnabled } from '@/config/runtime';
@@ -55,6 +56,7 @@ import {
   faSun,
   faTimes,
   faTrashAlt,
+  faTicketAlt,
   faUpload
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -74,7 +76,7 @@ library.add(
   faCalendarDay, faEdit, faFloppyDisk, faHome,
   faLocationArrow, faPhoneAlt, faPlus, faReceipt,
   faShoppingCart, faMoon, faSun, faTimes, faTrashAlt,
-  faUpload,
+  faUpload, faTicketAlt,
   farClock
 );
 

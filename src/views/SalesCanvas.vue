@@ -1,6 +1,6 @@
 <template>
-  <div class="canvas-page">
-    <header class="canvas-header">
+  <div class="canvas-page sales-ui">
+    <header class="canvas-header sales-header">
       <button class="btn-back" @click="router.back()" aria-label="Kembali" title="Kembali">
         <font-awesome-icon icon="chevron-left" />
       </button>
@@ -384,31 +384,16 @@
 
           <p v-if="mode === 'order' && getDraftPieces(item) > getStock(item)" class="customer-search-state">Qty melebihi {{ formatNumber(getStock(item)) }} PCS yang siap order.</p>
 
-          <div class="qty-grid">
-            <label>
-              <span>{{ item.uom1_nama || 'PCS' }}</span>
+          <div class="qty-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr))">
+            <label v-for="unit in productUoms(item)" :key="unit.id || unit.level">
+              <span>{{ productUomLabel(item, unit.level) }}</span>
               <div class="qty-stepper">
-                <button type="button" @click="adjustQty(item.id, 'qty_uom1', -1)" aria-label="Kurangi qty">-</button>
-                <input v-model.number="draft[item.id].qty_uom1" type="number" min="0" inputmode="numeric" />
-                <button type="button" @click="adjustQty(item.id, 'qty_uom1', 1)" aria-label="Tambah qty">+</button>
+                <button type="button" @click="adjustQty(item.id, `qty_uom${unit.level}`, -1)" :aria-label="`Kurangi ${unit.nama}`">-</button>
+                <input v-model.number="draft[item.id][`qty_uom${unit.level}`]" type="number" min="0" step="1" inputmode="numeric" :aria-label="`${item.nama_produk} — ${unit.nama}`" />
+                <button type="button" @click="adjustQty(item.id, `qty_uom${unit.level}`, 1)" :aria-label="`Tambah ${unit.nama}`">+</button>
               </div>
             </label>
-            <label :class="{ disabled: !hasUomLevel(item, 2) }">
-              <span>{{ item.uom2_nama || '-' }}</span>
-              <div class="qty-stepper">
-                <button type="button" @click="adjustQty(item.id, 'qty_uom2', -1)" :disabled="!hasUomLevel(item, 2)" aria-label="Kurangi qty">-</button>
-                <input v-model.number="draft[item.id].qty_uom2" type="number" min="0" inputmode="numeric" :disabled="!hasUomLevel(item, 2)" />
-                <button type="button" @click="adjustQty(item.id, 'qty_uom2', 1)" :disabled="!hasUomLevel(item, 2)" aria-label="Tambah qty">+</button>
-              </div>
-            </label>
-            <label :class="{ disabled: !hasUomLevel(item, 3) }">
-              <span>{{ item.uom3_nama || '-' }}</span>
-              <div class="qty-stepper">
-                <button type="button" @click="adjustQty(item.id, 'qty_uom3', -1)" :disabled="!hasUomLevel(item, 3)" aria-label="Kurangi qty">-</button>
-                <input v-model.number="draft[item.id].qty_uom3" type="number" min="0" inputmode="numeric" :disabled="!hasUomLevel(item, 3)" />
-                <button type="button" @click="adjustQty(item.id, 'qty_uom3', 1)" :disabled="!hasUomLevel(item, 3)" aria-label="Tambah qty">+</button>
-              </div>
-            </label>
+            <p v-if="!productUoms(item).length">Master UOM belum tersedia.</p>
           </div>
 
           <div class="product-footer">
@@ -434,11 +419,11 @@
     </main>
 
     <div v-if="historyModalOpen" class="modal-backdrop" @click.self="closeHistoryModal">
-      <section class="history-modal">
+      <section class="history-modal" role="dialog" aria-modal="true" aria-labelledby="canvas-history-title">
         <header>
           <div>
             <span>{{ historyModalTitle }}</span>
-            <h4>{{ selectedHistory ? historyDetailTitle : 'Riwayat' }}</h4>
+            <h4 id="canvas-history-title">{{ selectedHistory ? historyDetailTitle : 'Riwayat' }}</h4>
           </div>
           <button @click="closeHistoryModal" aria-label="Tutup" title="Tutup">
             <font-awesome-icon icon="times" />
@@ -496,11 +481,11 @@
     </div>
 
     <div v-if="voucherInfoOpen" class="modal-backdrop" @click.self="voucherInfoOpen = false">
-      <section class="history-modal voucher-info-modal">
+      <section class="history-modal voucher-info-modal" role="dialog" aria-modal="true" aria-labelledby="canvas-voucher-title">
         <header>
           <div>
             <span>Voucher Canvas</span>
-            <h4>Voucher yang tersedia</h4>
+            <h4 id="canvas-voucher-title">Voucher yang tersedia</h4>
           </div>
           <button @click="voucherInfoOpen = false" aria-label="Tutup" title="Tutup">
             <font-awesome-icon icon="times" />
@@ -546,6 +531,7 @@
 </template>
 
 <script setup>
+import { productUoms, productUom, productUomLabel, productUomTotal, productUomQuantities, emptyProductUomValues, formatProductUomQty, uomQuantity } from '@/utils/productUom';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
@@ -652,14 +638,10 @@ const orderHistoryParams = computed(() => ({ ...canvasScopeParams.value }));
 const ensureDraft = (rows) => {
   const next = { ...draft.value };
   rows.forEach((item) => {
-    const savedQty = {
-      qty_uom1: Number(item.qty_uom1 || 0),
-      qty_uom2: Number(item.qty_uom2 || 0),
-      qty_uom3: Number(item.qty_uom3 || 0)
-    };
-    const hasSavedQty = savedQty.qty_uom1 > 0 || savedQty.qty_uom2 > 0 || savedQty.qty_uom3 > 0;
+    const savedQty = Object.fromEntries(productUoms(item).map(unit => [`qty_uom${unit.level}`, uomQuantity(item[`qty_uom${unit.level}`])]));
+    const hasSavedQty = productUomTotal(item, savedQty, 'qty_uom') > 0;
     if (!next[item.id] || hasSavedQty) {
-      next[item.id] = hasSavedQty ? savedQty : { qty_uom1: 0, qty_uom2: 0, qty_uom3: 0 };
+      next[item.id] = hasSavedQty ? savedQty : emptyProductUomValues(item, 'qty_uom');
     }
   });
   draft.value = next;
@@ -973,9 +955,7 @@ const applyCarriedStockSummary = (rows) => {
 };
 
 const hasUomLevel = (item, level) => {
-  if (level === 2) return Boolean(item.uom2_nama) && Number(item.uom2_factor || 0) > 0;
-  if (level === 3) return Boolean(item.uom3_nama) && Number(item.uom3_factor || 0) > 0;
-  return true;
+  return Boolean(productUom(item, level));
 };
 
 const getStock = (item) => mode.value === 'request'
@@ -985,21 +965,13 @@ const getStock = (item) => mode.value === 'request'
     : Number(item.stock_canvas || 0);
 
 const getDraftPieces = (item) => {
-  const row = draft.value[item.id] || {};
-  return (
-    Number(row.qty_uom1 || 0) * Number(item.uom1_factor || 1) +
-    (hasUomLevel(item, 2) ? Number(row.qty_uom2 || 0) * Number(item.uom2_factor || 0) : 0) +
-    (hasUomLevel(item, 3) ? Number(row.qty_uom3 || 0) * Number(item.uom3_factor || 0) : 0)
-  );
+  return productUomTotal(item, draft.value[item.id] || {}, 'qty_uom');
 };
 
 const estimateLine = (item) => getDraftPieces(item) * Number(item.harga_per_uom1 || item.harga_beli || 0);
 
 const selectedItems = computed(() => items.value.filter((item) => {
-  const row = draft.value[item.id] || {};
-  return Number(row.qty_uom1 || 0) > 0
-    || (hasUomLevel(item, 2) && Number(row.qty_uom2 || 0) > 0)
-    || (hasUomLevel(item, 3) && Number(row.qty_uom3 || 0) > 0);
+  return getDraftPieces(item) > 0;
 }));
 
 const selectableCanvasVoucherTypes = [2, 3];
@@ -1075,7 +1047,8 @@ const buildCanvasVoucherItems = () => selectedItems.value.map((item) => ({
   id_produk: Number(item.id || item.id_produk || 0),
   qty_uom1: Number(draft.value[item.id]?.qty_uom1 || 0),
   qty_uom2: hasUomLevel(item, 2) ? Number(draft.value[item.id]?.qty_uom2 || 0) : 0,
-  qty_uom3: hasUomLevel(item, 3) ? Number(draft.value[item.id]?.qty_uom3 || 0) : 0
+  qty_uom3: hasUomLevel(item, 3) ? Number(draft.value[item.id]?.qty_uom3 || 0) : 0,
+  uom_quantities: productUomQuantities(item, draft.value[item.id] || {}, 'qty_uom')
 })).filter((item) => item.id_produk > 0);
 
 const buildCanvasVoucherSelections = () => selectedCanvasVoucherRows.value
@@ -1395,20 +1368,14 @@ const adjustQty = (id, field, delta) => {
   const current = draft.value[id] || { qty_uom1: 0, qty_uom2: 0, qty_uom3: 0 };
   draft.value[id] = {
     ...current,
-    [field]: Math.max(0, Number(current[field] || 0) + delta)
+    [field]: uomQuantity(Number(current[field] || 0) + delta)
   };
 };
 
 const hasSavedRequest = (item) => mode.value === 'request' && Number(item.qty_request_today || 0) > 0;
 
 const formatQty = (item) => {
-  const parts = [
-    { qty: item.qty_uom1, label: item.uom1_nama || 'PCS' },
-    { qty: item.qty_uom2, label: item.uom2_nama || 'BOX' },
-    { qty: item.qty_uom3, label: item.uom3_nama || 'CTN' }
-  ].filter((part) => Number(part.qty || 0) > 0)
-    .map((part) => `${formatNumber(part.qty)} ${part.label}`);
-  return parts.length ? parts.join(' + ') : '0';
+  return formatProductUomQty(item, item, 'qty_uom');
 };
 
 const closeHistoryModal = () => {
@@ -1534,7 +1501,7 @@ const fetchProducts = async () => {
       if (!isCurrent()) return;
       const rows = normalizeRows(detailResponse.data)
         .filter((item) => Number(item.available_order_qty_pcs || 0) > 0)
-        .map((item) => ({ ...item, qty_uom1: 0, qty_uom2: 0, qty_uom3: 0 }));
+        .map((item) => ({ ...item, ...emptyProductUomValues(item, 'qty_uom'), qty_uom1: 0, qty_uom2: 0, qty_uom3: 0 }));
       items.value = rows;
       ensureDraft(rows);
       return;
@@ -1637,7 +1604,8 @@ const submitRequest = async () => {
     const response = await api.post('/api/sales-canvas/create-canvas-request', {
       ...canvasScopeParams.value,
       id_produk: item.id,
-      ...draft.value[item.id]
+      ...draft.value[item.id],
+      uom_quantities: productUomQuantities(item, draft.value[item.id] || {}, 'qty_uom')
     });
     assertCanvasSuccess(response.data);
   }
@@ -1773,7 +1741,8 @@ const submitReturnStock = async () => {
     id_produk: item.id,
     qty_uom1: Number(draft.value[item.id]?.qty_uom1 || 0),
     qty_uom2: hasUomLevel(item, 2) ? Number(draft.value[item.id]?.qty_uom2 || 0) : 0,
-    qty_uom3: hasUomLevel(item, 3) ? Number(draft.value[item.id]?.qty_uom3 || 0) : 0
+    qty_uom3: hasUomLevel(item, 3) ? Number(draft.value[item.id]?.qty_uom3 || 0) : 0,
+    uom_quantities: productUomQuantities(item, draft.value[item.id] || {}, 'qty_uom')
   }));
 
   const response = await api.post('/api/sales-canvas/return-stock-canvas', {
@@ -2037,157 +2006,157 @@ onMounted(refreshCanvas);
 .detail-total span { color: #64748b; font-weight: 800; }
 .detail-total strong { color: #0f766e; font-size: 1.05rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
-:global(:root[data-theme='dark']) .canvas-page { background: #020617; color: #e2e8f0; }
-:global(:root[data-theme='dark']) .summary-card,
-:global(:root[data-theme='dark']) .principal-card,
-:global(:root[data-theme='dark']) .history-strip,
-:global(:root[data-theme='dark']) .canvas-history-panel,
-:global(:root[data-theme='dark']) .customer-card,
-:global(:root[data-theme='dark']) .payment-card,
-:global(:root[data-theme='dark']) .request-card,
-:global(:root[data-theme='dark']) .product-card,
-:global(:root[data-theme='dark']) .canvas-footer { background: #0f172a; border-color: #334155; }
-:global(:root[data-theme='dark']) .summary-card .carry-summary { border-color: #334155; }
-:global(:root[data-theme='dark']) .customer-card input,
-:global(:root[data-theme='dark']) .customer-card select,
-:global(:root[data-theme='dark']) .payment-card input,
-:global(:root[data-theme='dark']) .payment-card select,
-:global(:root[data-theme='dark']) .qty-grid input { background: #020617; border-color: #334155; color: #e2e8f0; }
-:global(:root[data-theme='dark']) .customer-results { background: #0f172a; border-color: #334155; box-shadow: 0 10px 24px rgba(0,0,0,0.3); }
-:global(:root[data-theme='dark']) .customer-result { background: #0f172a; color: #f8fafc; border-color: #334155; }
-:global(:root[data-theme='dark']) .customer-result:active { background: rgba(20,184,166,0.14); }
-:global(:root[data-theme='dark']) .customer-clear { background: #334155; color: #e2e8f0; }
-:global(:root[data-theme='dark']) .qty-stepper { background: #020617; border-color: #334155; }
-:global(:root[data-theme='dark']) .qty-stepper button { background: #111827; color: #2dd4bf; }
-:global(:root[data-theme='dark']) .payment-order-card { background: #020617; border-color: #334155; color: #f8fafc; }
-:global(:root[data-theme='dark']) .payment-order-card.active { background: rgba(20,184,166,0.12); border-color: #2dd4bf; }
-:global(:root[data-theme='dark']) .payment-order-amounts b { color: #f8fafc; }
-:global(:root[data-theme='dark']) .active-customer-box { background: rgba(20,184,166,0.12); border-color: rgba(45,212,191,0.35); }
-:global(:root[data-theme='dark']) .active-customer-box strong { color: #ccfbf1; }
-:global(:root[data-theme='dark']) .customer-card input[readonly] { background: #111827; color: #e2e8f0; }
-:global(:root[data-theme='dark']) .payment-summary,
-:global(:root[data-theme='dark']) .payment-history { background: #020617; border-color: #334155; }
-:global(:root[data-theme='dark']) .payment-hint { color: #94a3b8; }
-:global(:root[data-theme='dark']) .segmented { background: #0f172a; border-color: #334155; box-shadow: none; }
-:global(:root[data-theme='dark']) .segmented button { border-color: #334155; }
-:global(:root[data-theme='dark']) .canvas-history-head strong,
-:global(:root[data-theme='dark']) .canvas-history-summary,
-:global(:root[data-theme='dark']) .return-history-row strong { color: #f8fafc; }
-:global(:root[data-theme='dark']) .canvas-history-summary { background: #020617; border-color: #334155; }
-:global(:root[data-theme='dark']) .canvas-history-summary.request { background: rgba(30, 64, 175, .18); border-color: rgba(96, 165, 250, .38); }
-:global(:root[data-theme='dark']) .canvas-history-summary.order { background: rgba(6, 78, 59, .2); border-color: rgba(74, 222, 128, .3); }
-:global(:root[data-theme='dark']) .canvas-history-summary.return { background: rgba(124, 45, 18, .2); border-color: rgba(251, 146, 60, .35); }
-:global(:root[data-theme='dark']) .canvas-history-head button { background: rgba(20, 184, 166, .12); border-color: rgba(45, 212, 191, .35); color: #5eead4; }
-:global(:root[data-theme='dark']) .return-history-row { border-color: #334155; }
-:global(:root[data-theme='dark']) .history-modal { background: #0f172a; }
-:global(:root[data-theme='dark']) .history-modal header,
-:global(:root[data-theme='dark']) .detail-total { border-color: #334155; }
-:global(:root[data-theme='dark']) .history-modal header h4,
-:global(:root[data-theme='dark']) .history-row,
-:global(:root[data-theme='dark']) .detail-row { color: #f8fafc; }
-:global(:root[data-theme='dark']) .history-row,
-:global(:root[data-theme='dark']) .detail-row { background: #020617; border-color: #334155; }
-:global(:root[data-theme='dark']) .customer-history-box { background: rgba(20,83,45,0.22); border-color: rgba(74,222,128,0.35); }
-:global(:root[data-theme='dark']) .customer-history-box strong { color: #dcfce7; }
-:global(:root[data-theme='dark']) .segmented button.active { background: rgba(20,184,166,0.14); color: #2dd4bf; box-shadow: inset 0 0 0 1px rgba(45,212,191,0.24); }
-:global(:root[data-theme='dark']) .canvas-footer strong,
-:global(:root[data-theme='dark']) .payment-summary strong,
-:global(:root[data-theme='dark']) .payment-history p,
-:global(:root[data-theme='dark']) .product-main h4 { color: #f8fafc; }
+:root[data-theme='dark'] .canvas-page { background: #020617; color: #e2e8f0; }
+:root[data-theme='dark'] .summary-card,
+:root[data-theme='dark'] .principal-card,
+:root[data-theme='dark'] .history-strip,
+:root[data-theme='dark'] .canvas-history-panel,
+:root[data-theme='dark'] .customer-card,
+:root[data-theme='dark'] .payment-card,
+:root[data-theme='dark'] .request-card,
+:root[data-theme='dark'] .product-card,
+:root[data-theme='dark'] .canvas-footer { background: #0f172a; border-color: #334155; }
+:root[data-theme='dark'] .summary-card .carry-summary { border-color: #334155; }
+:root[data-theme='dark'] .customer-card input,
+:root[data-theme='dark'] .customer-card select,
+:root[data-theme='dark'] .payment-card input,
+:root[data-theme='dark'] .payment-card select,
+:root[data-theme='dark'] .qty-grid input { background: #020617; border-color: #334155; color: #e2e8f0; }
+:root[data-theme='dark'] .customer-results { background: #0f172a; border-color: #334155; box-shadow: 0 10px 24px rgba(0,0,0,0.3); }
+:root[data-theme='dark'] .customer-result { background: #0f172a; color: #f8fafc; border-color: #334155; }
+:root[data-theme='dark'] .customer-result:active { background: rgba(20,184,166,0.14); }
+:root[data-theme='dark'] .customer-clear { background: #334155; color: #e2e8f0; }
+:root[data-theme='dark'] .qty-stepper { background: #020617; border-color: #334155; }
+:root[data-theme='dark'] .qty-stepper button { background: #111827; color: #2dd4bf; }
+:root[data-theme='dark'] .payment-order-card { background: #020617; border-color: #334155; color: #f8fafc; }
+:root[data-theme='dark'] .payment-order-card.active { background: rgba(20,184,166,0.12); border-color: #2dd4bf; }
+:root[data-theme='dark'] .payment-order-amounts b { color: #f8fafc; }
+:root[data-theme='dark'] .active-customer-box { background: rgba(20,184,166,0.12); border-color: rgba(45,212,191,0.35); }
+:root[data-theme='dark'] .active-customer-box strong { color: #ccfbf1; }
+:root[data-theme='dark'] .customer-card input[readonly] { background: #111827; color: #e2e8f0; }
+:root[data-theme='dark'] .payment-summary,
+:root[data-theme='dark'] .payment-history { background: #020617; border-color: #334155; }
+:root[data-theme='dark'] .payment-hint { color: #94a3b8; }
+:root[data-theme='dark'] .segmented { background: #0f172a; border-color: #334155; box-shadow: none; }
+:root[data-theme='dark'] .segmented button { border-color: #334155; }
+:root[data-theme='dark'] .canvas-history-head strong,
+:root[data-theme='dark'] .canvas-history-summary,
+:root[data-theme='dark'] .return-history-row strong { color: #f8fafc; }
+:root[data-theme='dark'] .canvas-history-summary { background: #020617; border-color: #334155; }
+:root[data-theme='dark'] .canvas-history-summary.request { background: rgba(30, 64, 175, .18); border-color: rgba(96, 165, 250, .38); }
+:root[data-theme='dark'] .canvas-history-summary.order { background: rgba(6, 78, 59, .2); border-color: rgba(74, 222, 128, .3); }
+:root[data-theme='dark'] .canvas-history-summary.return { background: rgba(124, 45, 18, .2); border-color: rgba(251, 146, 60, .35); }
+:root[data-theme='dark'] .canvas-history-head button { background: rgba(20, 184, 166, .12); border-color: rgba(45, 212, 191, .35); color: #5eead4; }
+:root[data-theme='dark'] .return-history-row { border-color: #334155; }
+:root[data-theme='dark'] .history-modal { background: #0f172a; }
+:root[data-theme='dark'] .history-modal header,
+:root[data-theme='dark'] .detail-total { border-color: #334155; }
+:root[data-theme='dark'] .history-modal header h4,
+:root[data-theme='dark'] .history-row,
+:root[data-theme='dark'] .detail-row { color: #f8fafc; }
+:root[data-theme='dark'] .history-row,
+:root[data-theme='dark'] .detail-row { background: #020617; border-color: #334155; }
+:root[data-theme='dark'] .customer-history-box { background: rgba(20,83,45,0.22); border-color: rgba(74,222,128,0.35); }
+:root[data-theme='dark'] .customer-history-box strong { color: #dcfce7; }
+:root[data-theme='dark'] .segmented button.active { background: rgba(20,184,166,0.14); color: #2dd4bf; box-shadow: inset 0 0 0 1px rgba(45,212,191,0.24); }
+:root[data-theme='dark'] .canvas-footer strong,
+:root[data-theme='dark'] .payment-summary strong,
+:root[data-theme='dark'] .payment-history p,
+:root[data-theme='dark'] .product-main h4 { color: #f8fafc; }
 
-:global(:root[data-theme='light']) .canvas-page { background: #f8fafc; color: #0f172a; }
-:global(:root[data-theme='light']) .canvas-header { background: #fff; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
-:global(:root[data-theme='light']) .canvas-header p { color: #64748b; }
-:global(:root[data-theme='light']) .btn-back,
-:global(:root[data-theme='light']) .btn-refresh { background: #f1f5f9; color: #0f172a; }
-:global(:root[data-theme='light']) .summary-card,
-:global(:root[data-theme='light']) .principal-card,
-:global(:root[data-theme='light']) .history-strip,
-:global(:root[data-theme='light']) .customer-card,
-:global(:root[data-theme='light']) .payment-card,
-:global(:root[data-theme='light']) .request-card,
-:global(:root[data-theme='light']) .product-card,
-:global(:root[data-theme='light']) .canvas-footer,
-:global(:root[data-theme='light']) .history-modal {
+:root[data-theme='light'] .canvas-page { background: #f8fafc; color: #0f172a; }
+:root[data-theme='light'] .canvas-header { background: #fff; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+:root[data-theme='light'] .canvas-header p { color: #64748b; }
+:root[data-theme='light'] .btn-back,
+:root[data-theme='light'] .btn-refresh { background: #f1f5f9; color: #0f172a; }
+:root[data-theme='light'] .summary-card,
+:root[data-theme='light'] .principal-card,
+:root[data-theme='light'] .history-strip,
+:root[data-theme='light'] .customer-card,
+:root[data-theme='light'] .payment-card,
+:root[data-theme='light'] .request-card,
+:root[data-theme='light'] .product-card,
+:root[data-theme='light'] .canvas-footer,
+:root[data-theme='light'] .history-modal {
   background: #fff;
   border-color: #e2e8f0;
   color: #0f172a;
 }
-:global(:root[data-theme='light']) .summary-card .carry-summary,
-:global(:root[data-theme='light']) .history-modal header,
-:global(:root[data-theme='light']) .detail-total { border-color: #e2e8f0; }
-:global(:root[data-theme='light']) .summary-card strong,
-:global(:root[data-theme='light']) .principal-card-head strong,
-:global(:root[data-theme='light']) .history-strip strong,
-:global(:root[data-theme='light']) .request-card strong,
-:global(:root[data-theme='light']) .product-main h4,
-:global(:root[data-theme='light']) .payment-summary strong,
-:global(:root[data-theme='light']) .payment-history p,
-:global(:root[data-theme='light']) .payment-order-amounts b,
-:global(:root[data-theme='light']) .canvas-footer strong,
-:global(:root[data-theme='light']) .history-modal header h4,
-:global(:root[data-theme='light']) .history-row,
-:global(:root[data-theme='light']) .detail-row {
+:root[data-theme='light'] .summary-card .carry-summary,
+:root[data-theme='light'] .history-modal header,
+:root[data-theme='light'] .detail-total { border-color: #e2e8f0; }
+:root[data-theme='light'] .summary-card strong,
+:root[data-theme='light'] .principal-card-head strong,
+:root[data-theme='light'] .history-strip strong,
+:root[data-theme='light'] .request-card strong,
+:root[data-theme='light'] .product-main h4,
+:root[data-theme='light'] .payment-summary strong,
+:root[data-theme='light'] .payment-history p,
+:root[data-theme='light'] .payment-order-amounts b,
+:root[data-theme='light'] .canvas-footer strong,
+:root[data-theme='light'] .history-modal header h4,
+:root[data-theme='light'] .history-row,
+:root[data-theme='light'] .detail-row {
   color: #0f172a;
 }
-:global(:root[data-theme='light']) .summary-card span,
-:global(:root[data-theme='light']) .summary-card small,
-:global(:root[data-theme='light']) .principal-card-head span,
-:global(:root[data-theme='light']) .principal-card-head small,
-:global(:root[data-theme='light']) .history-strip span,
-:global(:root[data-theme='light']) .request-card span,
-:global(:root[data-theme='light']) .customer-card label,
-:global(:root[data-theme='light']) .payment-card label,
-:global(:root[data-theme='light']) .payment-summary span,
-:global(:root[data-theme='light']) .payment-history span,
-:global(:root[data-theme='light']) .product-main p,
-:global(:root[data-theme='light']) .product-footer,
-:global(:root[data-theme='light']) .qty-grid label span,
-:global(:root[data-theme='light']) .history-row span,
-:global(:root[data-theme='light']) .detail-row span,
-:global(:root[data-theme='light']) .payment-order-amounts,
-:global(:root[data-theme='light']) .canvas-footer span {
+:root[data-theme='light'] .summary-card span,
+:root[data-theme='light'] .summary-card small,
+:root[data-theme='light'] .principal-card-head span,
+:root[data-theme='light'] .principal-card-head small,
+:root[data-theme='light'] .history-strip span,
+:root[data-theme='light'] .request-card span,
+:root[data-theme='light'] .customer-card label,
+:root[data-theme='light'] .payment-card label,
+:root[data-theme='light'] .payment-summary span,
+:root[data-theme='light'] .payment-history span,
+:root[data-theme='light'] .product-main p,
+:root[data-theme='light'] .product-footer,
+:root[data-theme='light'] .qty-grid label span,
+:root[data-theme='light'] .history-row span,
+:root[data-theme='light'] .detail-row span,
+:root[data-theme='light'] .payment-order-amounts,
+:root[data-theme='light'] .canvas-footer span {
   color: #64748b;
 }
-:global(:root[data-theme='light']) .segmented { background: #fff; border-color: #cbd5e1; }
-:global(:root[data-theme='light']) .segmented button { color: #475569; }
-:global(:root[data-theme='light']) .segmented button { border-color: #e2e8f0; }
-:global(:root[data-theme='light']) .segmented button.active { background: #ecfdf5; color: #0f766e; }
-:global(:root[data-theme='light']) .customer-card input,
-:global(:root[data-theme='light']) .customer-card select,
-:global(:root[data-theme='light']) .payment-card input,
-:global(:root[data-theme='light']) .payment-card select,
-:global(:root[data-theme='light']) .qty-grid input,
-:global(:root[data-theme='light']) .qty-stepper {
+:root[data-theme='light'] .segmented { background: #fff; border-color: #cbd5e1; }
+:root[data-theme='light'] .segmented button { color: #475569; }
+:root[data-theme='light'] .segmented button { border-color: #e2e8f0; }
+:root[data-theme='light'] .segmented button.active { background: #ecfdf5; color: #0f766e; }
+:root[data-theme='light'] .customer-card input,
+:root[data-theme='light'] .customer-card select,
+:root[data-theme='light'] .payment-card input,
+:root[data-theme='light'] .payment-card select,
+:root[data-theme='light'] .qty-grid input,
+:root[data-theme='light'] .qty-stepper {
   background: #fff;
   border-color: #cbd5e1;
   color: #0f172a;
 }
-:global(:root[data-theme='light']) .qty-stepper button,
-:global(:root[data-theme='light']) .product-footer button,
-:global(:root[data-theme='light']) .history-modal header button { background: #f1f5f9; color: #0f766e; }
-:global(:root[data-theme='light']) .customer-card input[readonly],
-:global(:root[data-theme='light']) .payment-summary,
-:global(:root[data-theme='light']) .payment-history,
-:global(:root[data-theme='light']) .payment-order-card,
-:global(:root[data-theme='light']) .history-row,
-:global(:root[data-theme='light']) .detail-row { background: #f8fafc; border-color: #e2e8f0; }
-:global(:root[data-theme='light']) .payment-order-card.active,
-:global(:root[data-theme='light']) .active-customer-box { background: #f0fdfa; border-color: #99f6e4; }
-:global(:root[data-theme='light']) .active-customer-box strong { color: #134e4a; }
-:global(:root[data-theme='light']) .active-customer-box span,
-:global(:root[data-theme='light']) .active-customer-box small { color: #0f766e; }
+:root[data-theme='light'] .qty-stepper button,
+:root[data-theme='light'] .product-footer button,
+:root[data-theme='light'] .history-modal header button { background: #f1f5f9; color: #0f766e; }
+:root[data-theme='light'] .customer-card input[readonly],
+:root[data-theme='light'] .payment-summary,
+:root[data-theme='light'] .payment-history,
+:root[data-theme='light'] .payment-order-card,
+:root[data-theme='light'] .history-row,
+:root[data-theme='light'] .detail-row { background: #f8fafc; border-color: #e2e8f0; }
+:root[data-theme='light'] .payment-order-card.active,
+:root[data-theme='light'] .active-customer-box { background: #f0fdfa; border-color: #99f6e4; }
+:root[data-theme='light'] .active-customer-box strong { color: #134e4a; }
+:root[data-theme='light'] .active-customer-box span,
+:root[data-theme='light'] .active-customer-box small { color: #0f766e; }
 
-:global(:root[data-theme='dark']) .payment-order-amounts,
-:global(:root[data-theme='dark']) .product-main p,
-:global(:root[data-theme='dark']) .product-footer,
-:global(:root[data-theme='dark']) .qty-grid label span,
-:global(:root[data-theme='dark']) .summary-card small,
-:global(:root[data-theme='dark']) .principal-card-head span,
-:global(:root[data-theme='dark']) .principal-card-head small,
-:global(:root[data-theme='dark']) .principal-tabs button small { color: #94a3b8; }
-:global(:root[data-theme='dark']) .qty-grid label.disabled input,
-:global(:root[data-theme='dark']) .qty-grid label.disabled .qty-stepper { background: #1e293b; }
+:root[data-theme='dark'] .payment-order-amounts,
+:root[data-theme='dark'] .product-main p,
+:root[data-theme='dark'] .product-footer,
+:root[data-theme='dark'] .qty-grid label span,
+:root[data-theme='dark'] .summary-card small,
+:root[data-theme='dark'] .principal-card-head span,
+:root[data-theme='dark'] .principal-card-head small,
+:root[data-theme='dark'] .principal-tabs button small { color: #94a3b8; }
+:root[data-theme='dark'] .qty-grid label.disabled input,
+:root[data-theme='dark'] .qty-grid label.disabled .qty-stepper { background: #1e293b; }
 
 .canvas-page {
   --canvas-bg: var(--app-body-bg);
@@ -2297,8 +2266,8 @@ onMounted(refreshCanvas);
   border-color: #0f766e !important;
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .principal-tabs button.active,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .principal-tabs button.active {
+:root[data-theme='dark'] .principal-tabs button.active,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .principal-tabs button.active {
   border-color: #2dd4bf !important;
   color: #2dd4bf !important;
 }
@@ -2310,8 +2279,8 @@ onMounted(refreshCanvas);
   background: rgba(20, 184, 166, 0.14) !important;
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .segmented button.active,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .segmented button.active {
+:root[data-theme='dark'] .segmented button.active,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .segmented button.active {
   color: #2dd4bf !important;
 }
 .customer-card input,
@@ -2339,8 +2308,8 @@ onMounted(refreshCanvas);
   background: var(--canvas-surface-muted) !important;
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .qty-stepper button,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .qty-stepper button {
+:root[data-theme='dark'] .qty-stepper button,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .qty-stepper button {
   color: #2dd4bf !important;
 }
 .payment-order-card.active,
@@ -2355,10 +2324,10 @@ onMounted(refreshCanvas);
 .active-customer-box small {
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .active-customer-box span,
-:global(:root[data-theme='dark']) .active-customer-box small,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .active-customer-box span,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .active-customer-box small {
+:root[data-theme='dark'] .active-customer-box span,
+:root[data-theme='dark'] .active-customer-box small,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .active-customer-box span,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .active-customer-box small {
   color: #2dd4bf !important;
 }
 .canvas-voucher-head > div > span,
@@ -2366,20 +2335,20 @@ onMounted(refreshCanvas);
 .voucher-info-title > span {
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .canvas-voucher-head > div > span,
-:global(:root[data-theme='dark']) .canvas-voucher-info,
-:global(:root[data-theme='dark']) .voucher-info-title > span,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .canvas-voucher-head > div > span,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .canvas-voucher-info,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .voucher-info-title > span {
+:root[data-theme='dark'] .canvas-voucher-head > div > span,
+:root[data-theme='dark'] .canvas-voucher-info,
+:root[data-theme='dark'] .voucher-info-title > span,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .canvas-voucher-head > div > span,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .canvas-voucher-info,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .voucher-info-title > span {
   color: #2dd4bf !important;
 }
 .canvas-voucher-refresh {
   background: var(--canvas-surface-muted) !important;
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .canvas-voucher-refresh,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .canvas-voucher-refresh {
+:root[data-theme='dark'] .canvas-voucher-refresh,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .canvas-voucher-refresh {
   color: #2dd4bf !important;
 }
 .canvas-voucher-applied > div {
@@ -2393,10 +2362,10 @@ onMounted(refreshCanvas);
 .voucher-info-row em {
   color: #0f766e !important;
 }
-:global(:root[data-theme='dark']) .canvas-voucher-applied b,
-:global(:root[data-theme='dark']) .voucher-info-row em,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .canvas-voucher-applied b,
-:global(html[data-theme='dark'] body[data-theme='dark']) .canvas-page .voucher-info-row em {
+:root[data-theme='dark'] .canvas-voucher-applied b,
+:root[data-theme='dark'] .voucher-info-row em,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .canvas-voucher-applied b,
+html[data-theme='dark'] body[data-theme='dark'] .canvas-page .voucher-info-row em {
   color: #5eead4 !important;
 }
 .canvas-voucher-error { color: #dc2626 !important; }

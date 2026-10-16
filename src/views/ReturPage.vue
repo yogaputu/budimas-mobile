@@ -279,7 +279,7 @@
               <small>Barang masih layak</small>
             </div>
             <div class="retur-uom-grid">
-              <label v-for="field in ['pieces_retur_good', 'box_retur_good', 'karton_retur_good']" :key="field" class="retur-uom-field" :class="{ disabled: !isReturUomEnabled(selectedItemDetail, getReturFieldLevel(field)) }">
+              <label v-for="field in returnUomFields(selectedItemDetail, 'good')" :key="field" class="retur-uom-field">
                 <span>{{ getReturUomLabel(selectedItemDetail, getReturFieldLevel(field)) }}</span>
                 <div class="qty-box detail-qty-box">
                   <button class="qty-btn qty-btn-minus" type="button" :disabled="!isReturUomEnabled(selectedItemDetail, getReturFieldLevel(field))" @click="changeReturField(selectedItemDetail, field, -1)">-</button>
@@ -305,7 +305,7 @@
               <small>Barang rusak/expired</small>
             </div>
             <div class="retur-uom-grid">
-              <label v-for="field in ['pieces_retur_bad', 'box_retur_bad', 'karton_retur_bad']" :key="field" class="retur-uom-field" :class="{ disabled: !isReturUomEnabled(selectedItemDetail, getReturFieldLevel(field)) }">
+              <label v-for="field in returnUomFields(selectedItemDetail, 'bad')" :key="field" class="retur-uom-field">
                 <span>{{ getReturUomLabel(selectedItemDetail, getReturFieldLevel(field)) }}</span>
                 <div class="qty-box detail-qty-box">
                   <button class="qty-btn qty-btn-minus" type="button" :disabled="!isReturUomEnabled(selectedItemDetail, getReturFieldLevel(field))" @click="changeReturField(selectedItemDetail, field, -1)">-</button>
@@ -359,6 +359,7 @@ import { getDb } from '@/services/database';
 import { SyncService } from '@/services/SyncService';
 import { getPayloadArray } from '@/services/visitService';
 import { parseLocalDateInput, toLocalDateInputValue } from '@/utils/dateLocal';
+import { productUoms, productUom, productUomLabel, returnUomField, returnUomFields, returnUomQuantities, returnUomTotal, uomQuantity, formatProductUomQty, distributeProductUom } from '@/utils/productUom';
 import { Network } from '@capacitor/network';
 
 const route = useRoute();
@@ -787,80 +788,20 @@ const buildReturUomMeta = (item = {}) => {
   };
 };
 
-const getReturFieldLevel = (field) => {
-  if (field.includes('pieces')) return 1;
-  if (field.includes('box')) return 2;
-  if (field.includes('karton')) return 3;
-  return 0;
-};
-
-const getReturFieldFactor = (item, field) => {
-  const level = getReturFieldLevel(field);
-  if (level === 1) return 1;
-  if (level === 2) return Math.max(0, Number(item?.konversi2 || item?.stok?.Konversi2 || 0));
-  if (level === 3) return Math.max(0, Number(item?.konversi3 || item?.stok?.Konversi3 || 0));
-  return 0;
-};
-
-const isReturUomEnabled = (item, level) => {
-  if (!item) return false;
-  if (level === 1) return Boolean(item.hasUom1 ?? item.stok?.hasUom1);
-  if (level === 2) return Boolean(item.hasUom2 ?? item.stok?.hasUom2) && Number(item.konversi2 || item.stok?.Konversi2 || 0) > 0;
-  if (level === 3) return Boolean(item.hasUom3 ?? item.stok?.hasUom3) && Number(item.konversi3 || item.stok?.Konversi3 || 0) > 0;
-  return false;
-};
-
-const getReturUomLabel = (item, level) => {
-  if (!isReturUomEnabled(item, level)) return `UOM ${level} belum diset`;
-  if (level === 1) return item.uom1Label || item.stok?.Satuan || 'PCS';
-  if (level === 2) return `${item.uom2Label || item.stok?.NamaUnit} x ${formatNumber(item.konversi2 || item.stok?.Konversi2 || 0)}`;
-  return `${item.uom3Label || item.stok?.Uom3Label} x ${formatNumber(item.konversi3 || item.stok?.Konversi3 || 0)}`;
-};
-
-const formatReturnableUom = (item) => {
-  let remaining = getReturnableQty(item);
-  const uom = buildReturUomMeta(item);
-  const parts = [];
-
-  if (uom.hasUom3 && uom.konversi3 > 1) {
-    const amount = Math.floor(remaining / uom.konversi3);
-    if (amount) parts.push(formatNumber(amount) + ' ' + uom.uom3Label);
-    remaining %= uom.konversi3;
-  }
-  if (uom.hasUom2 && uom.konversi2 > 1) {
-    const amount = Math.floor(remaining / uom.konversi2);
-    if (amount) parts.push(formatNumber(amount) + ' ' + uom.uom2Label);
-    remaining %= uom.konversi2;
-  }
-  if (remaining || !parts.length) {
-    parts.push(formatNumber(remaining) + ' ' + (uom.uom1Label || 'PCS'));
-  }
-  return parts.join(' + ');
-};
-
-const recalculateReturEntry = (entry) => {
+const getReturFieldLevel = field => field.includes('pieces') ? 1 : field.includes('box') ? 2 : field.includes('karton') ? 3 : Number(field.match(/^uom(\d+)/)?.[1] || 0);
+const getReturFieldFactor = (item, field) => productUom(item, getReturFieldLevel(field))?.faktor_konversi || 0;
+const isReturUomEnabled = (item, level) => Boolean(productUom(item, level));
+const getReturUomLabel = (item, level) => productUomLabel(item, level);
+const formatReturnableUom = item => formatProductUomQty(item, distributeProductUom(item, getReturnableQty(item)));
+const recalculateReturEntry = entry => {
   if (!entry) return;
-  ['pieces_retur_good', 'box_retur_good', 'karton_retur_good', 'pieces_retur_bad', 'box_retur_bad', 'karton_retur_bad'].forEach((field) => {
-    const level = getReturFieldLevel(field);
-    if (!isReturUomEnabled(entry, level)) entry[field] = 0;
-  });
-
-  const goodCount = Number(entry.pieces_retur_good || 0) + Number(entry.box_retur_good || 0) + Number(entry.karton_retur_good || 0);
-  const badCount = Number(entry.pieces_retur_bad || 0) + Number(entry.box_retur_bad || 0) + Number(entry.karton_retur_bad || 0);
-  const totalPieces =
-    Number(entry.pieces_retur_good || 0) +
-    (Number(entry.box_retur_good || 0) * Number(entry.konversi2 || 0)) +
-    (Number(entry.karton_retur_good || 0) * Number(entry.konversi3 || 0)) +
-    Number(entry.pieces_retur_bad || 0) +
-    (Number(entry.box_retur_bad || 0) * Number(entry.konversi2 || 0)) +
-    (Number(entry.karton_retur_bad || 0) * Number(entry.konversi3 || 0));
-
-  entry.good_total = goodCount;
-  entry.bad_total = badCount;
-  entry.total_retur = goodCount + badCount;
-  entry.total_retur_pieces = totalPieces;
+  for (const kind of ['good', 'bad']) {
+    for (const field of returnUomFields(entry, kind)) entry[field] = uomQuantity(entry[field]);
+    entry[kind + '_total'] = returnUomFields(entry, kind).reduce((sum, field) => sum + entry[field], 0);
+  }
+  entry.total_retur = entry.good_total + entry.bad_total;
+  entry.total_retur_pieces = returnUomTotal(entry, 'good') + returnUomTotal(entry, 'bad');
 };
-
 const setReturFieldValue = (entry, field, value) => {
   if (!entry) return 0;
   const level = getReturFieldLevel(field);
@@ -892,22 +833,15 @@ const setReturFieldValue = (entry, field, value) => {
   return entry[field];
 };
 
-const getReturCartSummary = (kode) => {
+const getReturCartSummary = kode => {
   const entry = cart.value[String(kode || '').trim()];
-  if (!entry || Number(entry.total_retur || 0) <= 0) return '-';
-  const good = [
-    Number(entry.pieces_retur_good || 0) > 0 ? `${formatNumber(entry.pieces_retur_good)} ${entry.uom1Label}` : '',
-    Number(entry.box_retur_good || 0) > 0 ? `${formatNumber(entry.box_retur_good)} ${entry.uom2Label}` : '',
-    Number(entry.karton_retur_good || 0) > 0 ? `${formatNumber(entry.karton_retur_good)} ${entry.uom3Label}` : ''
-  ].filter(Boolean).join(' | ');
-  const bad = [
-    Number(entry.pieces_retur_bad || 0) > 0 ? `${formatNumber(entry.pieces_retur_bad)} ${entry.uom1Label}` : '',
-    Number(entry.box_retur_bad || 0) > 0 ? `${formatNumber(entry.box_retur_bad)} ${entry.uom2Label}` : '',
-    Number(entry.karton_retur_bad || 0) > 0 ? `${formatNumber(entry.karton_retur_bad)} ${entry.uom3Label}` : ''
-  ].filter(Boolean).join(' | ');
-  return [good ? `Good: ${good}` : '', bad ? `Bad: ${bad}` : ''].filter(Boolean).join(' / ');
+  if (!entry || !entry.total_retur_pieces) return '-';
+  return ['good', 'bad'].map(kind => {
+    const parts = productUoms(entry).filter(unit => uomQuantity(entry[returnUomField(unit.level, kind)]))
+      .map(unit => formatNumber(entry[returnUomField(unit.level, kind)]) + ' ' + unit.nama).join(' | ');
+    return parts ? (kind === 'good' ? 'Good: ' : 'Bad: ') + parts : '';
+  }).filter(Boolean).join(' / ');
 };
-
 const normalizeItems = (payload) => {
   const rows = getPayloadArray(payload);
 
@@ -1362,6 +1296,7 @@ const removeSelectedItem = async () => {
   if (cart.value[kode]) {
     cart.value[kode] = {
       ...cart.value[kode],
+      ...Object.fromEntries(['good', 'bad'].flatMap(kind => returnUomFields(cart.value[kode], kind).map(field => [field, 0]))),
       pieces_retur_good: 0,
       box_retur_good: 0,
       karton_retur_good: 0,
@@ -1423,6 +1358,8 @@ const buildReturPayload = () => {
       recalculateReturEntry(i);
       return {
         KodeStok: i.kode,
+        uom_quantities_good: returnUomQuantities(i, 'good'),
+        uom_quantities_bad: returnUomQuantities(i, 'bad'),
         NamaStok: i.nama,
         Qty: Number(i.total_retur_pieces),
         Unit: i.uom1Label,
@@ -1482,6 +1419,7 @@ const clearCartAfterSubmit = async () => {
   Object.keys(nextCart).forEach((key) => {
     nextCart[key] = {
       ...nextCart[key],
+      ...Object.fromEntries(['good', 'bad'].flatMap(kind => returnUomFields(nextCart[key], kind).map(field => [field, 0]))),
       pieces_retur_good: 0,
       box_retur_good: 0,
       karton_retur_good: 0,
@@ -3119,6 +3057,7 @@ onBeforeUnmount(() => {
 }
 
 .retur-uom-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
   display: grid;
   gap: 10px;
 }
@@ -3224,160 +3163,160 @@ onBeforeUnmount(() => {
   }
 }
 
-:global(:root[data-theme='dark']) .page-wrapper,
-:global(:root[data-theme='dark']) .retur-container,
-:global(:root[data-theme='dark']) .so-container,
-:global(:root[data-theme='dark']) .scroll-area {
+:root[data-theme='dark'] .page-wrapper,
+:root[data-theme='dark'] .retur-container,
+:root[data-theme='dark'] .so-container,
+:root[data-theme='dark'] .scroll-area {
   background: #050914 !important;
 }
 
-:global(:root[data-theme='dark']) .header.red-header {
+:root[data-theme='dark'] .header.red-header {
   background: linear-gradient(135deg, #0f172a 0%, #172554 54%, #991b1b 100%) !important;
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.34) !important;
 }
 
-:global(:root[data-theme='dark']) .fixed-nav-wrapper,
-:global(:root[data-theme='dark']) .customer-card,
-:global(:root[data-theme='dark']) .stock-card,
-:global(:root[data-theme='dark']) .detail-sheet,
-:global(:root[data-theme='dark']) .detail-actions,
-:global(:root[data-theme='dark']) .detail-box {
+:root[data-theme='dark'] .fixed-nav-wrapper,
+:root[data-theme='dark'] .customer-card,
+:root[data-theme='dark'] .stock-card,
+:root[data-theme='dark'] .detail-sheet,
+:root[data-theme='dark'] .detail-actions,
+:root[data-theme='dark'] .detail-box {
   background: linear-gradient(180deg, #0b1220 0%, #070b14 100%) !important;
   border-color: rgba(51, 65, 85, 0.95) !important;
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.42) !important;
 }
 
-:global(:root[data-theme='dark']) .tab-btn,
-:global(:root[data-theme='dark']) .search-input,
-:global(:root[data-theme='dark']) .qty-input,
-:global(:root[data-theme='dark']) .qty-input-plain,
-:global(:root[data-theme='dark']) .unit-select,
-:global(:root[data-theme='dark']) .btn-close-sheet {
+:root[data-theme='dark'] .tab-btn,
+:root[data-theme='dark'] .search-input,
+:root[data-theme='dark'] .qty-input,
+:root[data-theme='dark'] .qty-input-plain,
+:root[data-theme='dark'] .unit-select,
+:root[data-theme='dark'] .btn-close-sheet {
   background: #070d1a !important;
   border-color: rgba(71, 85, 105, 0.92) !important;
   color: #f8fafc !important;
 }
 
-:global(:root[data-theme='dark']) .tab-btn.active {
+:root[data-theme='dark'] .tab-btn.active {
   background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #b91c1c 100%) !important;
   border-color: rgba(96, 165, 250, 0.55) !important;
   color: #ffffff !important;
 }
 
-:global(:root[data-theme='dark']) .summary-pill,
-:global(:root[data-theme='dark']) .item-meta,
-:global(:root[data-theme='dark']) .summary-detail-card,
-:global(:root[data-theme='dark']) .form-card {
+:root[data-theme='dark'] .summary-pill,
+:root[data-theme='dark'] .item-meta,
+:root[data-theme='dark'] .summary-detail-card,
+:root[data-theme='dark'] .form-card {
   background: #0b1220 !important;
   border-color: rgba(51, 65, 85, 0.95) !important;
 }
 
-:global(:root[data-theme='dark']) .stock-card.is-unavailable {
+:root[data-theme='dark'] .stock-card.is-unavailable {
   opacity: 1 !important;
   background: linear-gradient(180deg, #0b1220 0%, #090f1b 100%) !important;
 }
 
-:global(:root[data-theme='dark']) .stock-card.is-unavailable .item-name-full {
+:root[data-theme='dark'] .stock-card.is-unavailable .item-name-full {
   color: #cbd5e1 !important;
 }
 
-:global(:root[data-theme='dark']) .stock-card.is-unavailable .qty-input-plain,
-:global(:root[data-theme='dark']) .stock-card.is-unavailable .unit-select {
+:root[data-theme='dark'] .stock-card.is-unavailable .qty-input-plain,
+:root[data-theme='dark'] .stock-card.is-unavailable .unit-select {
   background: #0f172a !important;
   border-color: rgba(51, 65, 85, 0.95) !important;
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .pending-bar {
+:root[data-theme='dark'] .pending-bar {
   background: linear-gradient(135deg, rgba(154, 52, 18, 0.18) 0%, rgba(127, 29, 29, 0.18) 100%) !important;
   border-color: rgba(249, 115, 22, 0.28) !important;
   color: #fdba74 !important;
 }
 
-:global(:root[data-theme='dark']) .slide-checkout-wrapper {
+:root[data-theme='dark'] .slide-checkout-wrapper {
   background: linear-gradient(135deg, #1f2937 0%, #111827 100%) !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
   box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.05) !important;
 }
 
-:global(:root[data-theme='dark']) .slide-hint {
+:root[data-theme='dark'] .slide-hint {
   color: #fca5a5 !important;
 }
 
-:global(:root[data-theme='dark']) .detail-sheet-head h3,
-:global(:root[data-theme='dark']) .detail-box strong,
-:global(:root[data-theme='dark']) .item-name-full,
-:global(:root[data-theme='dark']) .summary-pill strong {
+:root[data-theme='dark'] .detail-sheet-head h3,
+:root[data-theme='dark'] .detail-box strong,
+:root[data-theme='dark'] .item-name-full,
+:root[data-theme='dark'] .summary-pill strong {
   color: #f1f5f9 !important;
 }
 
-:global(:root[data-theme='dark']) .brand-tag {
+:root[data-theme='dark'] .brand-tag {
   color: #f87171 !important;
 }
 
-:global(:root[data-theme='dark']) .detail-sheet-head p,
-:global(:root[data-theme='dark']) .detail-box span,
-:global(:root[data-theme='dark']) .item-code,
-:global(:root[data-theme='dark']) .stock-info,
-:global(:root[data-theme='dark']) .price-info,
-:global(:root[data-theme='dark']) .summary-pill small,
-:global(:root[data-theme='dark']) .loading-state,
-:global(:root[data-theme='dark']) .empty-state,
-:global(:root[data-theme='dark']) .end-list {
+:root[data-theme='dark'] .detail-sheet-head p,
+:root[data-theme='dark'] .detail-box span,
+:root[data-theme='dark'] .item-code,
+:root[data-theme='dark'] .stock-info,
+:root[data-theme='dark'] .price-info,
+:root[data-theme='dark'] .summary-pill small,
+:root[data-theme='dark'] .loading-state,
+:root[data-theme='dark'] .empty-state,
+:root[data-theme='dark'] .end-list {
   color: #9fb0c7 !important;
 }
 
-:global(:root[data-theme='dark']) .stock-info,
-:global(:root[data-theme='dark']) .price-info,
-:global(:root[data-theme='dark']) .badge-suggest {
+:root[data-theme='dark'] .stock-info,
+:root[data-theme='dark'] .price-info,
+:root[data-theme='dark'] .badge-suggest {
   background: #111827 !important;
   border-color: rgba(51, 65, 85, 0.95) !important;
 }
 
-:global(:root[data-theme='dark']) .stock-info b,
-:global(:root[data-theme='dark']) .price-info b {
+:root[data-theme='dark'] .stock-info b,
+:root[data-theme='dark'] .price-info b {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .badge-suggest {
+:root[data-theme='dark'] .badge-suggest {
   color: #bfdbfe !important;
 }
 
-:global(:root[data-theme='dark']) .badge-suggest.empty {
+:root[data-theme='dark'] .badge-suggest.empty {
   color: #cbd5e1 !important;
 }
 
-:global(:root[data-theme='dark']) .detail-subtotal {
+:root[data-theme='dark'] .detail-subtotal {
   background: linear-gradient(135deg, rgba(127, 29, 29, 0.18), rgba(69, 10, 10, 0.24)) !important;
   border-color: rgba(248, 113, 113, 0.22) !important;
 }
 
-:global(:root[data-theme='dark']) .detail-subtotal span {
+:root[data-theme='dark'] .detail-subtotal span {
   color: #9fb0c7 !important;
 }
 
-:global(:root[data-theme='dark']) .detail-subtotal strong {
+:root[data-theme='dark'] .detail-subtotal strong {
   color: #fca5a5 !important;
 }
 
-:global(:root[data-theme='dark']) .return-status {
+:root[data-theme='dark'] .return-status {
   background: rgba(248, 113, 113, 0.14) !important;
   border-color: rgba(248, 113, 113, 0.32) !important;
   color: #fecaca !important;
 }
 
-:global(:root[data-theme='dark']) .btn-delete-item {
+:root[data-theme='dark'] .btn-delete-item {
   background: rgba(127, 29, 29, 0.2) !important;
   color: #fca5a5 !important;
   border-color: rgba(239, 68, 68, 0.28) !important;
 }
 
-:global(:root[data-theme='dark']) .loader-mini-red {
+:root[data-theme='dark'] .loader-mini-red {
   border-color: #1e293b !important;
   border-top-color: #ef4444 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page {
   background:
     radial-gradient(circle at top left, rgba(239, 68, 68, 0.10), transparent 28%),
     radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.08), transparent 32%),
@@ -3385,28 +3324,28 @@ onBeforeUnmount(() => {
   color: #f8fafc !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .so-container {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .so-container {
   background: #020617 !important;
   border-left: 0 !important;
   border-right: 0 !important;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.48) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .nav-section,
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .fixed-nav-wrapper,
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .footer-action {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .nav-section,
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .fixed-nav-wrapper,
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .footer-action {
   background: rgba(3, 7, 18, 0.96) !important;
   background-image: none !important;
   border-color: #1f2937 !important;
   color: #f8fafc !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .scroll-area {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .scroll-area {
   background: #000814 !important;
   background-image: none !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(
   .summary-pill,
   .stock-card,
   .item-meta,
@@ -3430,18 +3369,18 @@ onBeforeUnmount(() => {
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.38) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .stock-card.card-active-red {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .stock-card.card-active-red {
   background: linear-gradient(135deg, rgba(127, 29, 29, 0.24), rgba(3, 7, 18, 0.98)) !important;
   border-color: rgba(248, 113, 113, 0.40) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .stock-card.is-unavailable {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .stock-card.is-unavailable {
   background: #050914 !important;
   border-color: #1f2937 !important;
   opacity: 0.82 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(
   .tab-btn,
   .search-input,
   .date-input,
@@ -3462,7 +3401,7 @@ onBeforeUnmount(() => {
   box-shadow: none !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(
   .opname-input,
   .qty-input,
   .qty-input-plain,
@@ -3473,14 +3412,14 @@ onBeforeUnmount(() => {
   -webkit-text-fill-color: #64748b !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(
   .opname-input,
   .qty-input,
   .qty-input-plain,
   .unit-select,
   .qty-btn
 ):disabled,
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .retur-uom-field.disabled .qty-box {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .retur-uom-field.disabled .qty-box {
   background: #111827 !important;
   border-color: #1f2937 !important;
   color: #64748b !important;
@@ -3488,14 +3427,14 @@ onBeforeUnmount(() => {
   opacity: 0.72 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .tab-btn.active {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .tab-btn.active {
   background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%) !important;
   border-color: rgba(248, 113, 113, 0.58) !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(
   .header-title h3,
   .item-name,
   .item-name-full,
@@ -3511,7 +3450,7 @@ onBeforeUnmount(() => {
   color: #f8fafc !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(
   .header-title p,
   .item-code,
   .detail-sheet-head p,
@@ -3531,56 +3470,56 @@ onBeforeUnmount(() => {
   color: #9fb0c7 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(.red-text, .brand-tag, .summary-row.grand strong) {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(.red-text, .brand-tag, .summary-row.grand strong) {
   color: #fca5a5 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .retur-uom-head span {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .retur-uom-head span {
   color: #86efac !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .retur-uom-head.bad span {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .retur-uom-head.bad span {
   color: #fca5a5 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page :is(.badge-suggest, .return-status) {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page :is(.badge-suggest, .return-status) {
   background: rgba(239, 68, 68, 0.16) !important;
   border-color: rgba(248, 113, 113, 0.34) !important;
   color: #fecaca !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .badge-suggest.empty {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .badge-suggest.empty {
   background: #111827 !important;
   border-color: #334155 !important;
   color: #cbd5e1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .summary-row + .summary-row,
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .summary-row.grand {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .summary-row + .summary-row,
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .summary-row.grand {
   border-color: #334155 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .slide-checkout-wrapper {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .slide-checkout-wrapper {
   background: #111827 !important;
   background-image: none !important;
   border-color: rgba(248, 113, 113, 0.34) !important;
   box-shadow: inset 0 1px 0 rgba(248, 250, 252, 0.04) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .slide-fill {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .slide-fill {
   background: linear-gradient(90deg, #991b1b 0%, #ef4444 100%) !important;
   opacity: 0.22 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .slide-hint {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .slide-hint {
   color: #fecaca !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .detail-overlay {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .detail-overlay {
   background: rgba(0, 8, 20, 0.78) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .retur-page .detail-actions {
+html[data-theme='dark'] body[data-theme='dark'] .retur-page .detail-actions {
   background: #030712 !important;
   background-image: none !important;
   border-top-color: #1f2937 !important;
@@ -3719,21 +3658,21 @@ onBeforeUnmount(() => {
   font-weight: 800;
 }
 
-:global(html[data-theme='dark']) :global(.retur-success-popup),
-:global(body[data-theme='dark']) :global(.retur-success-popup) {
+:global(html[data-theme='dark'] .retur-success-popup),
+:global(body[data-theme='dark'] .retur-success-popup) {
   background: #020617 !important;
   border: 1px solid #1f2937 !important;
   color: #f8fafc !important;
 }
 
-:global(html[data-theme='dark']) :global(.retur-success-caption),
-:global(body[data-theme='dark']) :global(.retur-success-caption) {
+:global(html[data-theme='dark'] .retur-success-caption),
+:global(body[data-theme='dark'] .retur-success-caption) {
   color: #cbd5e1 !important;
   -webkit-text-fill-color: #cbd5e1 !important;
 }
 
-:global(html[data-theme='dark']) :global(.retur-success-code),
-:global(body[data-theme='dark']) :global(.retur-success-code) {
+:global(html[data-theme='dark'] .retur-success-code),
+:global(body[data-theme='dark'] .retur-success-code) {
   background: #111827 !important;
   background-image: none !important;
   border-color: #334155 !important;

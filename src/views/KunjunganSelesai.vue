@@ -594,75 +594,75 @@ onUnmounted(() => { if (timerInterval) clearInterval(timerInterval); });
 
 .ripple:active { background-color: rgba(0,0,0,0.05); }
 
-:global(:root[data-theme='dark']) .active-container,
-:global(:root[data-theme='dark']) .main-content {
+:root[data-theme='dark'] .active-container,
+:root[data-theme='dark'] .main-content {
   background: #000814 !important;
 }
 
-:global(:root[data-theme='dark']) .header-modern,
-:global(:root[data-theme='dark']) .action-card,
-:global(:root[data-theme='dark']) .bottom-sheet {
+:root[data-theme='dark'] .header-modern,
+:root[data-theme='dark'] .action-card,
+:root[data-theme='dark'] .bottom-sheet {
   background: linear-gradient(180deg, #030712 0%, #0a1020 100%) !important;
   border: 1px solid rgba(30, 41, 59, 0.95) !important;
   box-shadow: 0 20px 38px rgba(0, 0, 0, 0.42) !important;
 }
 
-:global(:root[data-theme='dark']) .btn-blur-back,
-:global(:root[data-theme='dark']) .reason-item,
-:global(:root[data-theme='dark']) .btn-sheet-close {
+:root[data-theme='dark'] .btn-blur-back,
+:root[data-theme='dark'] .reason-item,
+:root[data-theme='dark'] .btn-sheet-close {
   background: #020617 !important;
   border-color: rgba(51, 65, 85, 0.92) !important;
   color: #f1f5f9 !important;
 }
 
-:global(:root[data-theme='dark']) .header-title h3,
-:global(:root[data-theme='dark']) .card-info h4,
-:global(:root[data-theme='dark']) .store-name,
-:global(:root[data-theme='dark']) .sheet-header h3,
-:global(:root[data-theme='dark']) .reason-name {
+:root[data-theme='dark'] .header-title h3,
+:root[data-theme='dark'] .card-info h4,
+:root[data-theme='dark'] .store-name,
+:root[data-theme='dark'] .sheet-header h3,
+:root[data-theme='dark'] .reason-name {
   color: #f1f5f9 !important;
 }
 
-:global(:root[data-theme='dark']) .app-version,
-:global(:root[data-theme='dark']) .card-info p,
-:global(:root[data-theme='dark']) .sheet-header p,
-:global(:root[data-theme='dark']) .stat-item small,
-:global(:root[data-theme='dark']) .store-address {
+:root[data-theme='dark'] .app-version,
+:root[data-theme='dark'] .card-info p,
+:root[data-theme='dark'] .sheet-header p,
+:root[data-theme='dark'] .stat-item small,
+:root[data-theme='dark'] .store-address {
   color: #9fb0c7 !important;
 }
 
-:global(:root[data-theme='dark']) .highlight-card {
+:root[data-theme='dark'] .highlight-card {
   box-shadow: 0 22px 42px rgba(0, 0, 0, 0.5) !important;
 }
 
-:global(:root[data-theme='dark']) .card-active {
+:root[data-theme='dark'] .card-active {
   border-color: rgba(45, 212, 191, 0.42) !important;
   background: linear-gradient(180deg, rgba(6, 78, 59, 0.28), rgba(3, 7, 18, 0.96)) !important;
   box-shadow: 0 18px 30px rgba(13, 148, 136, 0.14) !important;
 }
 
-:global(:root[data-theme='dark']) .bg-gradient-gray {
+:root[data-theme='dark'] .bg-gradient-gray {
   background: #111827 !important;
   color: #64748b !important;
 }
 
-:global(:root[data-theme='dark']) .sheet-handle,
-:global(:root[data-theme='dark']) .reason-checkbox {
+:root[data-theme='dark'] .sheet-handle,
+:root[data-theme='dark'] .reason-checkbox {
   background: #1e293b !important;
   border-color: #334155 !important;
 }
 
-:global(:root[data-theme='dark']) .active-reason {
+:root[data-theme='dark'] .active-reason {
   border-color: #2563eb !important;
   background: linear-gradient(180deg, rgba(37, 99, 235, 0.18), rgba(3, 7, 18, 0.98)) !important;
 }
 
-:global(:root[data-theme='dark']) .reason-checkbox.checked {
+:root[data-theme='dark'] .reason-checkbox.checked {
   border-color: #60a5fa !important;
   background: #2563eb !important;
 }
 
-:global(:root[data-theme='dark']) .btn-text-danger {
+:root[data-theme='dark'] .btn-text-danger {
   color: #fca5a5 !important;
 }
 </style>

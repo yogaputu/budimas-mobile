@@ -1,10 +1,10 @@
 <template>
-  <div class="history-hub-page">
-    <header class="hub-header">
+  <div class="history-hub-page sales-ui sales-document-page">
+    <header class="hub-header sales-header">
       <button @click="router.back()" class="back-btn" aria-label="Kembali" title="Kembali"><font-awesome-icon icon="chevron-left" /></button>
       <div>
         <p class="eyebrow">{{ visitLabel }}</p>
-        <h1>Histori Outlet</h1>
+        <h1>Riwayat Customer</h1>
         <p class="subtitle">{{ customerName }}</p>
       </div>
     </header>
@@ -51,27 +51,27 @@
 
     <section class="menu-grid">
       <button class="menu-card" @click="goTo('sales')">
-        <div class="menu-icon blue">🧾</div>
+        <div class="menu-icon blue"><font-awesome-icon icon="file-invoice" /></div>
         <strong>Riwayat Order</strong>
         <span>Semua penjualan customer</span>
       </button>
 
       <button class="menu-card" @click="goTo('retur')">
-        <div class="menu-icon red">↩</div>
+        <div class="menu-icon red"><font-awesome-icon icon="rotate-right" /></div>
         <strong>Riwayat Retur</strong>
         <span>Barang rusak dan retur</span>
       </button>
 
       <button class="menu-card" @click="goTo('invoice')">
-        <div class="menu-icon green">💳</div>
+        <div class="menu-icon green"><font-awesome-icon icon="receipt" /></div>
         <strong>Invoice</strong>
         <span>Tagihan dan detail nota</span>
       </button>
 
       <button class="menu-card" @click="goTo('payment')">
-        <div class="menu-icon amber">💰</div>
-        <strong>Histori Pembayaran</strong>
-        <span>Pembayaran online dan offline</span>
+        <div class="menu-icon amber"><font-awesome-icon icon="money-bill-wave" /></div>
+        <strong>Riwayat Pembayaran</strong>
+        <span>Penerimaan & status kuitansi</span>
       </button>
     </section>
   </div>

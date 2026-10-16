@@ -408,8 +408,8 @@ async downloadStokMasterData(){
         await db.run(
           `
           INSERT OR REPLACE INTO stok_master
-          (kode, nama, satuan, nama_unit, nama_brand, brand, harga, suggestion, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (kode, nama, satuan, nama_unit, nama_brand, brand, harga, suggestion, payload_json, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
           [
             String(item.Kode || '').trim(),
@@ -420,6 +420,7 @@ async downloadStokMasterData(){
             String(item.Principle || '').trim(),
             Number(item.HargaE || 0),
             Number(item.Suggestion || 0),
+            JSON.stringify(item),
             nowIso()
           ]
         );
@@ -1368,8 +1369,8 @@ async uploadPendingKunjunganData() {
         for (const item of items) {
           await db.run(
             `INSERT OR REPLACE INTO stok_master
-            (kode, nama, satuan, nama_unit, nama_brand, brand, harga, suggestion, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (kode, nama, satuan, nama_unit, nama_brand, brand, harga, suggestion, payload_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               String(item.Kode || '').trim(),
               String(item.Nama || '').trim(),
@@ -1379,6 +1380,7 @@ async uploadPendingKunjunganData() {
               String(item.Principle || '').trim(),
               Number(item.HargaE || 0),
               Number(item.Suggestion || 0),
+              JSON.stringify(item),
               nowIso()
             ]
           );

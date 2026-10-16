@@ -201,8 +201,8 @@ onUnmounted(async () => {
         <div class="premium-spinner"></div>
       </div>
       <div class="loading-text">
-        <h3>BUDIMAS ERP</h3>
-        <p>Initializing Secure Session...</p>
+        <h3>BUDIMAS SALES</h3>
+        <p>Menyiapkan sesi Anda…</p>
       </div>
     </div>
   </div>

@@ -15,6 +15,7 @@ try {
     let data=[];
     if(u.pathname.endsWith('/workflow/lphs'))data=[row];
     if(u.pathname.endsWith('/workflow/lphs/1'))data=detail;
+    if(u.pathname.endsWith('/workflow/collection-options'))data={customers:[{id:1,kode:'C1',nama:'Toko Test'}],invoices:detail.status_dokumen==='AKTIF'?[{id:7,id_lph:1,kode_lph:'LPH-TEST',no_faktur:'F-TEST',remaining:1000,available_to_collect:1000-detail.claims.reduce((s,c)=>s+Number(c.amount),0),pending_amount:0}]:[],has_more_customers:false};
     if(method==='POST') {
      const payload=route.request().postDataJSON();writes.push({path:u.pathname,payload});
      if(u.pathname.endsWith('/accept')) {assert.deepEqual(payload.checked_detail_ids,[11,12]);row.status_dokumen=detail.status_dokumen='AKTIF';}
@@ -33,10 +34,13 @@ try {
  assert.equal(await page.getByRole('button',{name:'Terima LPH',exact:true}).isDisabled(),true);
  await page.locator('input[type=checkbox]').check();
  await page.getByRole('button',{name:'Terima LPH',exact:true}).click();
- await page.getByLabel('Faktur',{exact:false}).selectOption('7');
+ await page.goto(origin+'/payment?kode_customer=C1&nama_toko=Toko%20Test');
+ await page.getByLabel('Faktur dari LPH aktif',{exact:true}).selectOption('1:7');
  await page.getByLabel('Nominal (Rp)',{exact:true}).fill('1000');
- await page.getByRole('button',{name:'Simpan Klaim',exact:true}).click();
- await page.getByRole('status').filter({hasText:'Klaim tercatat'}).waitFor();
+ await page.getByRole('button',{name:'Simpan Penerimaan',exact:true}).click();
+ await page.getByRole('status').filter({hasText:'Penerimaan tercatat'}).waitFor();
+ await page.goto(origin+'/lph-kuitansi');
+ await page.getByRole('button',{name:/LPH-TEST/}).click();
  await page.getByRole('button',{name:'Kembalikan LPH',exact:true}).click();
  await page.getByRole('definition').filter({hasText:/1\.000/}).first().waitFor();
  await page.getByText('Total Uang Diperoleh',{exact:true}).waitFor();

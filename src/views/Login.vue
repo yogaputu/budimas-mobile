@@ -389,51 +389,51 @@ input:focus {
   background: #1a1a3d !important;
 }
 
-:global(:root[data-theme='dark']) .login-wrapper {
+:root[data-theme='dark'] .login-wrapper {
   background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
 }
 
-:global(:root[data-theme='dark']) .login-card {
+:root[data-theme='dark'] .login-card {
   background: #0f172a;
   border: 1px solid #334155;
   box-shadow: 0 25px 50px -18px rgba(2, 6, 23, 0.55);
 }
 
-:global(:root[data-theme='dark']) .brand-logo {
+:root[data-theme='dark'] .brand-logo {
   background: #111827;
   box-shadow: 0 12px 20px -8px rgba(2, 6, 23, 0.45);
 }
 
-:global(:root[data-theme='dark']) .brand-title {
+:root[data-theme='dark'] .brand-title {
   color: #f8fafc;
 }
 
-:global(:root[data-theme='dark']) .brand-title .thin,
-:global(:root[data-theme='dark']) .brand-subtitle,
-:global(:root[data-theme='dark']) .input-label,
-:global(:root[data-theme='dark']) .company-name,
-:global(:root[data-theme='dark']) .legal-text,
-:global(:root[data-theme='dark']) .version-tag {
+:root[data-theme='dark'] .brand-title .thin,
+:root[data-theme='dark'] .brand-subtitle,
+:root[data-theme='dark'] .input-label,
+:root[data-theme='dark'] .company-name,
+:root[data-theme='dark'] .legal-text,
+:root[data-theme='dark'] .version-tag {
   color: #94a3b8;
 }
 
-:global(:root[data-theme='dark']) input {
+:root[data-theme='dark'] input {
   background: #111827;
   border-color: #334155;
   color: #f8fafc;
 }
 
-:global(:root[data-theme='dark']) input:focus {
+:root[data-theme='dark'] input:focus {
   background: #111827;
   border-color: #60a5fa;
   box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
 }
 
-:global(:root[data-theme='dark']) .login-footer {
+:root[data-theme='dark'] .login-footer {
   border-top-color: #1f2937;
 }
 
-:global(:root[data-theme='dark']) .bg-decoration {
+:root[data-theme='dark'] .bg-decoration {
   background: radial-gradient(circle, rgba(59, 130, 246, 0.16) 0%, rgba(255, 255, 255, 0) 72%);
 }
 </style>

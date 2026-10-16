@@ -224,12 +224,14 @@ const createBaseTables = async () => {
       brand TEXT,
       harga REAL DEFAULT 0,
       suggestion REAL DEFAULT 0,
+      payload_json TEXT,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
   `;
 
   await db.execute(tableQuery);
+  await safeAddColumn('stok_master', 'payload_json', 'TEXT');
 };
 
 // =========================

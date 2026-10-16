@@ -114,8 +114,7 @@
                 @change="updateUnit(item, $event.target.value)"
                 class="unit-select"
               >
-                <option :value="item.Satuan">{{ item.Satuan }}</option>
-                <option v-if="item.NamaUnit" :value="item.NamaUnit">{{ item.NamaUnit }}</option>
+                <option v-for="unit in productUoms(item)" :key="unit.id || unit.level" :value="unit.nama">{{ productUomLabel(item, unit.level) }}</option>
               </select>
             </div>
           </div>
@@ -165,6 +164,7 @@
 </template>
 
 <script setup>
+import { productUoms, productUomLabel } from '@/utils/productUom';
 import { ref, onMounted, computed, watch, defineProps } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/axios';
@@ -267,8 +267,9 @@ const totalInput = computed(() =>
 );
 
 const totalQtyInput = computed(() =>
-  Object.values(opnameData.value).reduce((sum, item) => sum + (Number(item.qty) || 0), 0)
+  Object.values(opnameData.value).reduce((sum, item) => sum + opnameBaseQty(item), 0)
 );
+const opnameBaseQty = item => (Number(item.qty) || 0) * (productUoms(item).find(unit => unit.nama === item.unit)?.faktor_konversi || 1);
 
 const unwrapList = (data) => {
   if (Array.isArray(data)) return data;
@@ -331,6 +332,12 @@ const normalizeStokItem = (item = {}) => {
     Suggestion: Number(item.Suggestion || item.suggestion || 0),
     displayBrand: brand
   };
+};
+
+const cachedStokItem = row => {
+  let payload = {};
+  try { payload = JSON.parse(row.payload_json || '{}'); } catch { /* Keep a damaged old cache row readable; reload master before saving. */ }
+  return normalizeStokItem({ ...row, ...payload });
 };
 
 // =========================
@@ -417,12 +424,12 @@ const getAllStokMaster = async () => {
 
   try {
     const res = await db.query(`
-      SELECT kode, nama, satuan, nama_unit, nama_brand, harga, suggestion
+      SELECT kode, nama, satuan, nama_unit, nama_brand, harga, suggestion, payload_json
       FROM stok_master
       ORDER BY nama ASC
     `);
 
-    return (res.values || []).map(normalizeStokItem);
+    return (res.values || []).map(cachedStokItem);
   } catch (err) {
     console.error('❌ getAllStokMaster error:', err);
     return [];
@@ -436,7 +443,7 @@ const getStokMasterByBrand = async (brandName) => {
   try {
     const res = await db.query(
       `
-      SELECT kode, nama, satuan, nama_unit, nama_brand, harga, suggestion
+      SELECT kode, nama, satuan, nama_unit, nama_brand, harga, suggestion, payload_json
       FROM stok_master
       WHERE nama_brand = ?
       ORDER BY nama ASC
@@ -444,7 +451,7 @@ const getStokMasterByBrand = async (brandName) => {
       [brandName]
     );
 
-    return (res.values || []).map(normalizeStokItem);
+    return (res.values || []).map(cachedStokItem);
   } catch (err) {
     console.error('❌ getStokMasterByBrand error:', err);
     return [];
@@ -497,6 +504,7 @@ const hydrateItemToDraft = (item) => {
       nama: String(item.Nama || '').trim(),
       qty: null,
       unit: String(item.Satuan || '').trim(),
+      uoms: productUoms(item),
       harga: Number(item.HargaE || 0),
       stokSystem: Number(item.StokAkhir || 0),
       pt: item.displayBrand || item.NamaBrand || ''
@@ -513,6 +521,7 @@ const hydrateItemToDraft = (item) => {
         null,
       nama: opnameData.value[cleanKode].nama || String(item.Nama || '').trim(),
       unit: opnameData.value[cleanKode].unit || String(item.Satuan || '').trim(),
+      uoms: productUoms(item),
       harga: opnameData.value[cleanKode].harga || Number(item.HargaE || 0),
       stokSystem: opnameData.value[cleanKode].stokSystem ?? Number(item.StokAkhir || 0),
       pt: opnameData.value[cleanKode].pt || item.displayBrand || item.NamaBrand || ''
@@ -603,7 +612,7 @@ const getOpnameEntry = (kode) => {
 const getQtyDiff = (item) => {
   const entry = getOpnameEntry(item.Kode);
   if (entry.qty === null || entry.qty === '' || entry.qty === undefined) return null;
-  return Number(entry.qty || 0) - Number(item.StokAkhir || 0);
+  return opnameBaseQty(entry) - Number(item.StokAkhir || 0);
 };
 
 const filteredItems = computed(() => {
@@ -1014,6 +1023,11 @@ const saveOpname = async () => {
     ? rawData.value.map((item) => getOpnameEntry(item.Kode))
     : Object.values(opnameData.value);
 
+  if (sourceItems.some(item => isQtyFilled(item.qty) && (!Number.isInteger(Number(item.qty)) || Number(item.qty) < 0 || !productUoms(item).some(unit => unit.nama === item.unit)))) {
+    resetSlide();
+    return Swal.fire('Periksa UOM', 'Jumlah harus bilangan bulat tidak negatif dan UOM harus sesuai master produk. Muat ulang produk jika satuannya berubah.', 'warning');
+  }
+
   const itemsToSubmit = sourceItems
     .filter((i) => isQtyFilled(i.qty))
     .map((i) => ({
@@ -1021,6 +1035,7 @@ const saveOpname = async () => {
       id_produk: i.id_produk || null,
       Jumlah: Number(i.qty),
       Satuan: i.unit,
+      uom_quantities: (() => { const unit = productUoms(i).find(unit => unit.nama === i.unit); return unit ? [{ uom_id: unit.id, level: unit.level, quantity: Number(i.qty) }] : []; })(),
       Harga: Number(i.harga || 0),
       StokSystem: Number(i.stokSystem || 0)
     }));
@@ -1627,86 +1642,86 @@ onMounted(async () => {
   to { transform: rotate(360deg); }
 }
 
-:global(:root[data-theme='dark']) .page-wrapper,
-:global(:root[data-theme='dark']) .stock-opname-container,
-:global(:root[data-theme='dark']) .scroll-area {
+:root[data-theme='dark'] .page-wrapper,
+:root[data-theme='dark'] .stock-opname-container,
+:root[data-theme='dark'] .scroll-area {
   background: #020617 !important;
 }
 
-:global(:root[data-theme='dark']) .fixed-nav-wrapper,
-:global(:root[data-theme='dark']) .stock-card {
+:root[data-theme='dark'] .fixed-nav-wrapper,
+:root[data-theme='dark'] .stock-card {
   background: #0f172a !important;
   border-color: #334155 !important;
   box-shadow: 0 16px 32px rgba(2, 6, 23, 0.34) !important;
 }
 
-:global(:root[data-theme='dark']) .tab-item,
-:global(:root[data-theme='dark']) .search-input,
-:global(:root[data-theme='dark']) .summary-pill,
-:global(:root[data-theme='dark']) .opname-input,
-:global(:root[data-theme='dark']) .unit-select {
+:root[data-theme='dark'] .tab-item,
+:root[data-theme='dark'] .search-input,
+:root[data-theme='dark'] .summary-pill,
+:root[data-theme='dark'] .opname-input,
+:root[data-theme='dark'] .unit-select {
   background: #111827 !important;
   border-color: #334155 !important;
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .tab-item.active {
+:root[data-theme='dark'] .tab-item.active {
   background: #2563eb !important;
   border-color: #2563eb !important;
 }
 
-:global(:root[data-theme='dark']) .summary-pill small,
-:global(:root[data-theme='dark']) .stock-info,
-:global(:root[data-theme='dark']) .search-icon,
-:global(:root[data-theme='dark']) .loading-state,
-:global(:root[data-theme='dark']) .end-list,
-:global(:root[data-theme='dark']) .empty-state {
+:root[data-theme='dark'] .summary-pill small,
+:root[data-theme='dark'] .stock-info,
+:root[data-theme='dark'] .search-icon,
+:root[data-theme='dark'] .loading-state,
+:root[data-theme='dark'] .end-list,
+:root[data-theme='dark'] .empty-state {
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .summary-pill strong,
-:global(:root[data-theme='dark']) .item-name-full,
-:global(:root[data-theme='dark']) .header-title h3 {
+:root[data-theme='dark'] .summary-pill strong,
+:root[data-theme='dark'] .item-name-full,
+:root[data-theme='dark'] .header-title h3 {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .item-code {
+:root[data-theme='dark'] .item-code {
   color: #64748b !important;
 }
 
-:global(:root[data-theme='dark']) .stock-card.is-filled {
+:root[data-theme='dark'] .stock-card.is-filled {
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(15, 23, 42, 0.92)) !important;
   border-color: rgba(59, 130, 246, 0.36) !important;
 }
 
-:global(:root[data-theme='dark']) .badge-suggest {
+:root[data-theme='dark'] .badge-suggest {
   background: rgba(251, 191, 36, 0.16) !important;
   color: #fcd34d !important;
 }
 
-:global(:root[data-theme='dark']) .cart-brief.warning {
+:root[data-theme='dark'] .cart-brief.warning {
   background: rgba(154, 52, 18, 0.18) !important;
   border-color: rgba(249, 115, 22, 0.28) !important;
   color: #fdba74 !important;
 }
 
-:global(:root[data-theme='dark']) .diff-equal {
+:root[data-theme='dark'] .diff-equal {
   background: rgba(22, 163, 74, 0.18) !important;
   color: #86efac !important;
 }
 
-:global(:root[data-theme='dark']) .diff-up {
+:root[data-theme='dark'] .diff-up {
   background: rgba(37, 99, 235, 0.18) !important;
   color: #93c5fd !important;
 }
 
-:global(:root[data-theme='dark']) .diff-down {
+:root[data-theme='dark'] .diff-down {
   background: rgba(234, 88, 12, 0.18) !important;
   color: #fdba74 !important;
 }
 
-:global(:root[data-theme='dark']) .loader-enterprise,
-:global(:root[data-theme='dark']) .loader-mini-blue {
+:root[data-theme='dark'] .loader-enterprise,
+:root[data-theme='dark'] .loader-mini-blue {
   border-color: #1e293b !important;
   border-top-color: #60a5fa !important;
 }

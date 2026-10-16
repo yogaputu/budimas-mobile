@@ -1189,88 +1189,88 @@ onUnmounted(() => clearInterval(timerInterval));
   to { transform: translateY(0); }
 }
 
-:global(:root[data-theme='dark']) .enterprise-container {
+:root[data-theme='dark'] .enterprise-container {
   background: linear-gradient(180deg, #020617 0%, #0f172a 24%, #020617 100%) !important;
 }
 
-:global(:root[data-theme='dark']) .glass-header,
-:global(:root[data-theme='dark']) .identity-card,
-:global(:root[data-theme='dark']) .action-card,
-:global(:root[data-theme='dark']) .action-mini-card,
-:global(:root[data-theme='dark']) .history-entry,
-:global(:root[data-theme='dark']) .modal-sheet {
+:root[data-theme='dark'] .glass-header,
+:root[data-theme='dark'] .identity-card,
+:root[data-theme='dark'] .action-card,
+:root[data-theme='dark'] .action-mini-card,
+:root[data-theme='dark'] .history-entry,
+:root[data-theme='dark'] .modal-sheet {
   background: rgba(15, 23, 42, 0.92) !important;
   border: 1px solid rgba(51, 65, 85, 0.9) !important;
   box-shadow: 0 18px 36px rgba(2, 6, 23, 0.36) !important;
 }
 
-:global(:root[data-theme='dark']) .page-title,
-:global(:root[data-theme='dark']) .store-name,
-:global(:root[data-theme='dark']) .history-panel-head h4,
-:global(:root[data-theme='dark']) .modal-header h3,
-:global(:root[data-theme='dark']) .card-text h4,
-:global(:root[data-theme='dark']) .stat-item .value,
-:global(:root[data-theme='dark']) .action-mini-card h5 {
+:root[data-theme='dark'] .page-title,
+:root[data-theme='dark'] .store-name,
+:root[data-theme='dark'] .history-panel-head h4,
+:root[data-theme='dark'] .modal-header h3,
+:root[data-theme='dark'] .card-text h4,
+:root[data-theme='dark'] .stat-item .value,
+:root[data-theme='dark'] .action-mini-card h5 {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .section-label,
-:global(:root[data-theme='dark']) .history-panel-head p,
-:global(:root[data-theme='dark']) .modal-header p,
-:global(:root[data-theme='dark']) .card-text p,
-:global(:root[data-theme='dark']) .stat-item label,
-:global(:root[data-theme='dark']) .connectivity-status,
-:global(:root[data-theme='dark']) .store-address,
-:global(:root[data-theme='dark']) .store-address i {
+:root[data-theme='dark'] .section-label,
+:root[data-theme='dark'] .history-panel-head p,
+:root[data-theme='dark'] .modal-header p,
+:root[data-theme='dark'] .card-text p,
+:root[data-theme='dark'] .stat-item label,
+:root[data-theme='dark'] .connectivity-status,
+:root[data-theme='dark'] .store-address,
+:root[data-theme='dark'] .store-address i {
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .stats-grid {
+:root[data-theme='dark'] .stats-grid {
   border-top-color: rgba(51, 65, 85, 0.88) !important;
 }
 
-:global(:root[data-theme='dark']) .lock-overlay {
+:root[data-theme='dark'] .lock-overlay {
   background: rgba(2, 6, 23, 0.78) !important;
   color: #64748b !important;
 }
 
-:global(:root[data-theme='dark']) .checkout-footer {
+:root[data-theme='dark'] .checkout-footer {
   background: linear-gradient(to top, rgba(2, 6, 23, 0.95) 80%, transparent) !important;
 }
 
-:global(:root[data-theme='dark']) .swipe-wrapper {
+:root[data-theme='dark'] .swipe-wrapper {
   background: #1e293b !important;
   box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08) !important;
 }
 
-:global(:root[data-theme='dark']) .swipe-instruction {
+:root[data-theme='dark'] .swipe-instruction {
   color: #cbd5e1 !important;
 }
 
-:global(:root[data-theme='dark']) .handle {
+:root[data-theme='dark'] .handle {
   background: #334155 !important;
 }
 
-:global(:root[data-theme='dark']) .reason-btn {
+:root[data-theme='dark'] .reason-btn {
   background: #111827 !important;
   border-color: #334155 !important;
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .reason-btn.active {
+:root[data-theme='dark'] .reason-btn.active {
   background: #2563eb !important;
   border-color: #2563eb !important;
   color: #eff6ff !important;
 }
 
 /* Final dark contrast guard: avoid washed-out visit screen from shared theme layers. */
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container,
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container * {
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container,
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container * {
   filter: none !important;
   mix-blend-mode: normal !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container {
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container {
   background:
     radial-gradient(circle at top right, rgba(37, 99, 235, 0.16), transparent 28%),
        linear-gradient(180deg, #000814 0%, #020617 44%, #000814 100%) !important;
@@ -1278,7 +1278,7 @@ onUnmounted(() => clearInterval(timerInterval));
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container :is(
   .glass-header,
   .identity-card,
   .action-card,
@@ -1293,7 +1293,7 @@ onUnmounted(() => clearInterval(timerInterval));
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container :is(
   .page-title,
   .store-name,
   .history-panel-head h4,
@@ -1306,7 +1306,7 @@ onUnmounted(() => clearInterval(timerInterval));
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container :is(
   .system-label,
   .connectivity-status,
   .section-label,
@@ -1322,7 +1322,7 @@ onUnmounted(() => clearInterval(timerInterval));
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .enterprise-container .action-card.primary-gradient {
+html[data-theme='dark'] body[data-theme='dark'] .enterprise-container .action-card.primary-gradient {
   background: linear-gradient(135deg, rgba(30, 64, 175, 0.38), rgba(3, 7, 18, 0.96)) !important;
   border-color: rgba(96, 165, 250, 0.38) !important;
 }

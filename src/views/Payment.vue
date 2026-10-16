@@ -1349,97 +1349,97 @@ onMounted(async () => {
   to { transform: rotate(360deg); }
 }
 
-:global(:root[data-theme='dark']) .page-wrapper,
-:global(:root[data-theme='dark']) .payment-container,
-:global(:root[data-theme='dark']) .scroll-area {
+:root[data-theme='dark'] .page-wrapper,
+:root[data-theme='dark'] .payment-container,
+:root[data-theme='dark'] .scroll-area {
   background: #020617 !important;
 }
 
-:global(:root[data-theme='dark']) .header {
+:root[data-theme='dark'] .header {
   background: linear-gradient(135deg, #0f766e, #115e59) !important;
 }
 
-:global(:root[data-theme='dark']) .form-card {
+:root[data-theme='dark'] .form-card {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .pending-box {
+:root[data-theme='dark'] .pending-box {
   background: rgba(154, 52, 18, 0.18) !important;
   border-color: rgba(249, 115, 22, 0.28) !important;
   color: #fdba74 !important;
 }
 
-:global(:root[data-theme='dark']) .payment-summary-card {
+:root[data-theme='dark'] .payment-summary-card {
   background: linear-gradient(135deg, rgba(20, 184, 166, 0.16) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
   border-color: rgba(45, 212, 191, 0.28) !important;
 }
 
-:global(:root[data-theme='dark']) .input-group label,
-:global(:root[data-theme='dark']) .summary-line,
-:global(:root[data-theme='dark']) .piutang-row {
+:root[data-theme='dark'] .input-group label,
+:root[data-theme='dark'] .summary-line,
+:root[data-theme='dark'] .piutang-row {
   color: #cbd5e1 !important;
 }
 
-:global(:root[data-theme='dark']) .custom-select,
-:global(:root[data-theme='dark']) .custom-input,
-:global(:root[data-theme='dark']) .info-piutang {
+:root[data-theme='dark'] .custom-select,
+:root[data-theme='dark'] .custom-input,
+:root[data-theme='dark'] .info-piutang {
   background: #0f172a !important;
   border-color: #334155 !important;
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .btn-method {
+:root[data-theme='dark'] .btn-method {
   background: transparent !important;
   border-color: #2dd4bf !important;
   color: #5eead4 !important;
   box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.08) !important;
 }
 
-:global(:root[data-theme='dark']) .info-piutang {
+:root[data-theme='dark'] .info-piutang {
   border-left-color: #2dd4bf !important;
 }
 
-:global(:root[data-theme='dark']) .total-row {
+:root[data-theme='dark'] .total-row {
   border-top-color: #334155 !important;
 }
 
-:global(:root[data-theme='dark']) .btn-method.active {
+:root[data-theme='dark'] .btn-method.active {
   background: linear-gradient(135deg, #0f766e, #14b8a6) !important;
   border-color: #5eead4 !important;
   color: #f8fafc !important;
   box-shadow: 0 12px 24px rgba(20, 184, 166, 0.3) !important;
 }
 
-:global(:root[data-theme='dark']) .footer-action {
+:root[data-theme='dark'] .footer-action {
   border-top-color: #1e293b !important;
   background: #020617 !important;
 }
 
-:global(:root[data-theme='dark']) .btn-save-payment:disabled {
+:root[data-theme='dark'] .btn-save-payment:disabled {
   background: #334155 !important;
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .payment-status.is-paid {
+:root[data-theme='dark'] .payment-status.is-paid {
   background: rgba(22, 163, 74, 0.18) !important;
   color: #86efac !important;
 }
 
-:global(:root[data-theme='dark']) .payment-status.is-partial {
+:root[data-theme='dark'] .payment-status.is-partial {
   background: rgba(217, 119, 6, 0.18) !important;
   color: #fcd34d !important;
 }
 
-:global(:root[data-theme='dark']) .payment-status.is-unpaid {
+:root[data-theme='dark'] .payment-status.is-unpaid {
   background: rgba(185, 28, 28, 0.2) !important;
   color: #fca5a5 !important;
 }
 
-:global(:root[data-theme='dark']) .state-container {
+:root[data-theme='dark'] .state-container {
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .loader-enterprise {
+:root[data-theme='dark'] .loader-enterprise {
   border-color: #1e293b !important;
   border-top-color: #5eead4 !important;
 }

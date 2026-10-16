@@ -1556,111 +1556,111 @@ onMounted(async () => {
   }
 }
 
-:global(:root[data-theme='dark']) .checkin-container {
+:root[data-theme='dark'] .checkin-container {
   background:
     radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 24%),
     linear-gradient(180deg, #000814 0%, #020617 100%) !important;
 }
 
-:global(:root[data-theme='dark']) .header-enterprise,
-:global(:root[data-theme='dark']) .summary-card,
-:global(:root[data-theme='dark']) .readiness-card,
-:global(:root[data-theme='dark']) .action-callout,
-:global(:root[data-theme='dark']) .history-card-section,
-:global(:root[data-theme='dark']) .reason-history-box,
-:global(:root[data-theme='dark']) .location-status,
-:global(:root[data-theme='dark']) .menu-item,
-:global(:root[data-theme='dark']) .readiness-item {
+:root[data-theme='dark'] .header-enterprise,
+:root[data-theme='dark'] .summary-card,
+:root[data-theme='dark'] .readiness-card,
+:root[data-theme='dark'] .action-callout,
+:root[data-theme='dark'] .history-card-section,
+:root[data-theme='dark'] .reason-history-box,
+:root[data-theme='dark'] .location-status,
+:root[data-theme='dark'] .menu-item,
+:root[data-theme='dark'] .readiness-item {
   background: linear-gradient(180deg, #030712 0%, #0a1020 100%) !important;
   border-color: rgba(30, 41, 59, 0.95) !important;
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.4) !important;
 }
 
-:global(:root[data-theme='dark']) .btn-back,
-:global(:root[data-theme='dark']) .btn-back-only {
+:root[data-theme='dark'] .btn-back,
+:root[data-theme='dark'] .btn-back-only {
   background: #020617 !important;
   color: #f1f5f9 !important;
   border: 1px solid rgba(51, 65, 85, 0.92) !important;
 }
 
-:global(:root[data-theme='dark']) .header-content .title,
-:global(:root[data-theme='dark']) .summary-card strong,
-:global(:root[data-theme='dark']) .readiness-item strong,
-:global(:root[data-theme='dark']) .readiness-head h5,
-:global(:root[data-theme='dark']) .action-copy h5,
-:global(:root[data-theme='dark']) .menu-text span,
-:global(:root[data-theme='dark']) .nota-no,
-:global(:root[data-theme='dark']) .reason-history-box p {
+:root[data-theme='dark'] .header-content .title,
+:root[data-theme='dark'] .summary-card strong,
+:root[data-theme='dark'] .readiness-item strong,
+:root[data-theme='dark'] .readiness-head h5,
+:root[data-theme='dark'] .action-copy h5,
+:root[data-theme='dark'] .menu-text span,
+:root[data-theme='dark'] .nota-no,
+:root[data-theme='dark'] .reason-history-box p {
   color: #f1f5f9 !important;
 }
 
-:global(:root[data-theme='dark']) .header-content .subtitle,
-:global(:root[data-theme='dark']) .summary-card small,
-:global(:root[data-theme='dark']) .summary-label,
-:global(:root[data-theme='dark']) .readiness-item p,
-:global(:root[data-theme='dark']) .hero-subtitle,
-:global(:root[data-theme='dark']) .hero-state small,
-:global(:root[data-theme='dark']) .note-footer,
-:global(:root[data-theme='dark']) .menu-text small,
-:global(:root[data-theme='dark']) .section-label,
-:global(:root[data-theme='dark']) .reason-history-box label {
+:root[data-theme='dark'] .header-content .subtitle,
+:root[data-theme='dark'] .summary-card small,
+:root[data-theme='dark'] .summary-label,
+:root[data-theme='dark'] .readiness-item p,
+:root[data-theme='dark'] .hero-subtitle,
+:root[data-theme='dark'] .hero-state small,
+:root[data-theme='dark'] .note-footer,
+:root[data-theme='dark'] .menu-text small,
+:root[data-theme='dark'] .section-label,
+:root[data-theme='dark'] .reason-history-box label {
   color: #9fb0c7 !important;
 }
 
-:global(:root[data-theme='dark']) .hero-panel {
+:root[data-theme='dark'] .hero-panel {
   background: linear-gradient(135deg, #071126 0%, #132341 45%, #1c3667 100%) !important;
   box-shadow: 0 24px 56px rgba(0, 0, 0, 0.42) !important;
 }
 
-:global(:root[data-theme='dark']) .banner-success {
+:root[data-theme='dark'] .banner-success {
   background: rgba(6, 95, 70, 0.18) !important;
   border-color: rgba(16, 185, 129, 0.32) !important;
   color: #6ee7b7 !important;
 }
 
-:global(:root[data-theme='dark']) .banner-failed {
+:root[data-theme='dark'] .banner-failed {
   background: rgba(120, 53, 15, 0.18) !important;
   border-color: rgba(245, 158, 11, 0.32) !important;
   color: #fcd34d !important;
 }
 
-:global(:root[data-theme='dark']) .menu-icon.blue {
+:root[data-theme='dark'] .menu-icon.blue {
   background: rgba(37, 99, 235, 0.16) !important;
   color: #93c5fd !important;
 }
 
-:global(:root[data-theme='dark']) .menu-icon.orange {
+:root[data-theme='dark'] .menu-icon.orange {
   background: rgba(249, 115, 22, 0.16) !important;
   color: #fdba74 !important;
 }
 
-:global(:root[data-theme='dark']) .location-status.success {
+:root[data-theme='dark'] .location-status.success {
   background: rgba(6, 95, 70, 0.18) !important;
 }
 
-:global(:root[data-theme='dark']) .location-status.success p,
-:global(:root[data-theme='dark']) .nota-amount,
-:global(:root[data-theme='dark']) .success-icon {
+:root[data-theme='dark'] .location-status.success p,
+:root[data-theme='dark'] .nota-amount,
+:root[data-theme='dark'] .success-icon {
   color: #6ee7b7 !important;
 }
 
-:global(:root[data-theme='dark']) .custom-loader-small {
+:root[data-theme='dark'] .custom-loader-small {
   border-color: #1e293b !important;
   border-top-color: #60a5fa !important;
 }
 
 /* Final theme pass for Check-In confirmation. Keeps this page isolated from
    older global page/card rules that can bleed across light and dark mode. */
-:global(html[data-theme='light']) .checkin-container,
-:global(body[data-theme='light']) .checkin-container,
-:global(:root[data-theme='light']) .checkin-container {
+html[data-theme='light'] .checkin-container,
+body[data-theme='light'] .checkin-container,
+:root[data-theme='light'] .checkin-container {
   background:
     radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent 26%),
     linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%) !important;
   color: #0f172a !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(
+html[data-theme='light'] .checkin-container :is(
   .header-enterprise,
   .summary-card,
   .readiness-card,
@@ -1670,7 +1670,7 @@ onMounted(async () => {
   .location-status,
   .menu-item
 ),
-:global(body[data-theme='light']) .checkin-container :is(
+body[data-theme='light'] .checkin-container :is(
   .header-enterprise,
   .summary-card,
   .readiness-card,
@@ -1680,7 +1680,7 @@ onMounted(async () => {
   .location-status,
   .menu-item
 ),
-:global(:root[data-theme='light']) .checkin-container :is(
+:root[data-theme='light'] .checkin-container :is(
   .header-enterprise,
   .summary-card,
   .readiness-card,
@@ -1696,16 +1696,16 @@ onMounted(async () => {
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.07) !important;
 }
 
-:global(html[data-theme='light']) .checkin-container .header-enterprise,
-:global(body[data-theme='light']) .checkin-container .header-enterprise,
-:global(:root[data-theme='light']) .checkin-container .header-enterprise {
+html[data-theme='light'] .checkin-container .header-enterprise,
+body[data-theme='light'] .checkin-container .header-enterprise,
+:root[data-theme='light'] .checkin-container .header-enterprise {
   background: rgba(255, 255, 255, 0.96) !important;
   border-bottom-color: #dbeafe !important;
 }
 
-:global(html[data-theme='light']) .checkin-container .hero-panel,
-:global(body[data-theme='light']) .checkin-container .hero-panel,
-:global(:root[data-theme='light']) .checkin-container .hero-panel {
+html[data-theme='light'] .checkin-container .hero-panel,
+body[data-theme='light'] .checkin-container .hero-panel,
+:root[data-theme='light'] .checkin-container .hero-panel {
   background:
     radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 30%),
     linear-gradient(135deg, #eff6ff 0%, #ffffff 58%, #dbeafe 100%) !important;
@@ -1714,7 +1714,7 @@ onMounted(async () => {
   box-shadow: 0 18px 38px rgba(37, 99, 235, 0.12) !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(
+html[data-theme='light'] .checkin-container :is(
   .header-content .title,
   .hero-title,
   .summary-card strong,
@@ -1727,7 +1727,7 @@ onMounted(async () => {
   .nota-no,
   .reason-history-box p
 ),
-:global(body[data-theme='light']) .checkin-container :is(
+body[data-theme='light'] .checkin-container :is(
   .header-content .title,
   .hero-title,
   .summary-card strong,
@@ -1740,7 +1740,7 @@ onMounted(async () => {
   .nota-no,
   .reason-history-box p
 ),
-:global(:root[data-theme='light']) .checkin-container :is(
+:root[data-theme='light'] .checkin-container :is(
   .header-content .title,
   .hero-title,
   .summary-card strong,
@@ -1758,7 +1758,7 @@ onMounted(async () => {
   text-shadow: none !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(
+html[data-theme='light'] .checkin-container :is(
   .header-content .subtitle,
   .hero-subtitle,
   .hero-state small,
@@ -1775,7 +1775,7 @@ onMounted(async () => {
   .section-label,
   .reason-history-box label
 ),
-:global(body[data-theme='light']) .checkin-container :is(
+body[data-theme='light'] .checkin-container :is(
   .header-content .subtitle,
   .hero-subtitle,
   .hero-state small,
@@ -1792,7 +1792,7 @@ onMounted(async () => {
   .section-label,
   .reason-history-box label
 ),
-:global(:root[data-theme='light']) .checkin-container :is(
+:root[data-theme='light'] .checkin-container :is(
   .header-content .subtitle,
   .hero-subtitle,
   .hero-state small,
@@ -1814,52 +1814,52 @@ onMounted(async () => {
   text-shadow: none !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(.btn-back, .btn-back-only),
-:global(body[data-theme='light']) .checkin-container :is(.btn-back, .btn-back-only),
-:global(:root[data-theme='light']) .checkin-container :is(.btn-back, .btn-back-only) {
+html[data-theme='light'] .checkin-container :is(.btn-back, .btn-back-only),
+body[data-theme='light'] .checkin-container :is(.btn-back, .btn-back-only),
+:root[data-theme='light'] .checkin-container :is(.btn-back, .btn-back-only) {
   background: #eff6ff !important;
   border: 1px solid #bfdbfe !important;
   color: #1d4ed8 !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
-:global(body[data-theme='light']) .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
-:global(:root[data-theme='light']) .checkin-container :is(.readiness-mini, .readiness-item, .inline-status) {
+html[data-theme='light'] .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
+body[data-theme='light'] .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
+:root[data-theme='light'] .checkin-container :is(.readiness-mini, .readiness-item, .inline-status) {
   background: #f8fafc !important;
   border-color: #dbeafe !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
-:global(body[data-theme='light']) .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
-:global(:root[data-theme='light']) .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done) {
+html[data-theme='light'] .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
+body[data-theme='light'] .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
+:root[data-theme='light'] .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done) {
   background: #ecfdf5 !important;
   border-color: #bbf7d0 !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(.state-info, .inline-status.state-info),
-:global(body[data-theme='light']) .checkin-container :is(.state-info, .inline-status.state-info),
-:global(:root[data-theme='light']) .checkin-container :is(.state-info, .inline-status.state-info) {
+html[data-theme='light'] .checkin-container :is(.state-info, .inline-status.state-info),
+body[data-theme='light'] .checkin-container :is(.state-info, .inline-status.state-info),
+:root[data-theme='light'] .checkin-container :is(.state-info, .inline-status.state-info) {
   background: #eff6ff !important;
   border-color: #bfdbfe !important;
 }
 
-:global(html[data-theme='light']) .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
-:global(body[data-theme='light']) .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
-:global(:root[data-theme='light']) .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending) {
+html[data-theme='light'] .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
+body[data-theme='light'] .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
+:root[data-theme='light'] .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending) {
   background: #fff7ed !important;
   border-color: #fed7aa !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container,
-:global(body[data-theme='dark']) .checkin-container,
-:global(:root[data-theme='dark']) .checkin-container {
+html[data-theme='dark'] .checkin-container,
+body[data-theme='dark'] .checkin-container,
+:root[data-theme='dark'] .checkin-container {
   background:
     radial-gradient(circle at top right, rgba(37, 99, 235, 0.14), transparent 24%),
     linear-gradient(180deg, #020617 0%, #030712 100%) !important;
   color: #e2e8f0 !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(
+html[data-theme='dark'] .checkin-container :is(
   .header-enterprise,
   .summary-card,
   .readiness-card,
@@ -1869,7 +1869,7 @@ onMounted(async () => {
   .location-status,
   .menu-item
 ),
-:global(body[data-theme='dark']) .checkin-container :is(
+body[data-theme='dark'] .checkin-container :is(
   .header-enterprise,
   .summary-card,
   .readiness-card,
@@ -1879,7 +1879,7 @@ onMounted(async () => {
   .location-status,
   .menu-item
 ),
-:global(:root[data-theme='dark']) .checkin-container :is(
+:root[data-theme='dark'] .checkin-container :is(
   .header-enterprise,
   .summary-card,
   .readiness-card,
@@ -1895,15 +1895,15 @@ onMounted(async () => {
   box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34) !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container .hero-panel,
-:global(body[data-theme='dark']) .checkin-container .hero-panel,
-:global(:root[data-theme='dark']) .checkin-container .hero-panel {
+html[data-theme='dark'] .checkin-container .hero-panel,
+body[data-theme='dark'] .checkin-container .hero-panel,
+:root[data-theme='dark'] .checkin-container .hero-panel {
   background: linear-gradient(135deg, #020617 0%, #0f1f3d 48%, #17315f 100%) !important;
   border-color: rgba(96, 165, 250, 0.22) !important;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.38) !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(
+html[data-theme='dark'] .checkin-container :is(
   .header-content .title,
   .hero-title,
   .summary-card strong,
@@ -1916,7 +1916,7 @@ onMounted(async () => {
   .nota-no,
   .reason-history-box p
 ),
-:global(body[data-theme='dark']) .checkin-container :is(
+body[data-theme='dark'] .checkin-container :is(
   .header-content .title,
   .hero-title,
   .summary-card strong,
@@ -1929,7 +1929,7 @@ onMounted(async () => {
   .nota-no,
   .reason-history-box p
 ),
-:global(:root[data-theme='dark']) .checkin-container :is(
+:root[data-theme='dark'] .checkin-container :is(
   .header-content .title,
   .hero-title,
   .summary-card strong,
@@ -1947,7 +1947,7 @@ onMounted(async () => {
   text-shadow: none !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(
+html[data-theme='dark'] .checkin-container :is(
   .header-content .subtitle,
   .hero-subtitle,
   .hero-state small,
@@ -1964,7 +1964,7 @@ onMounted(async () => {
   .section-label,
   .reason-history-box label
 ),
-:global(body[data-theme='dark']) .checkin-container :is(
+body[data-theme='dark'] .checkin-container :is(
   .header-content .subtitle,
   .hero-subtitle,
   .hero-state small,
@@ -1981,7 +1981,7 @@ onMounted(async () => {
   .section-label,
   .reason-history-box label
 ),
-:global(:root[data-theme='dark']) .checkin-container :is(
+:root[data-theme='dark'] .checkin-container :is(
   .header-content .subtitle,
   .hero-subtitle,
   .hero-state small,
@@ -2003,125 +2003,125 @@ onMounted(async () => {
   text-shadow: none !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(.btn-back, .btn-back-only),
-:global(body[data-theme='dark']) .checkin-container :is(.btn-back, .btn-back-only),
-:global(:root[data-theme='dark']) .checkin-container :is(.btn-back, .btn-back-only) {
+html[data-theme='dark'] .checkin-container :is(.btn-back, .btn-back-only),
+body[data-theme='dark'] .checkin-container :is(.btn-back, .btn-back-only),
+:root[data-theme='dark'] .checkin-container :is(.btn-back, .btn-back-only) {
   background: #0f172a !important;
   border: 1px solid rgba(51, 65, 85, 0.92) !important;
   color: #e2e8f0 !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
-:global(body[data-theme='dark']) .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
-:global(:root[data-theme='dark']) .checkin-container :is(.readiness-mini, .readiness-item, .inline-status) {
+html[data-theme='dark'] .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
+body[data-theme='dark'] .checkin-container :is(.readiness-mini, .readiness-item, .inline-status),
+:root[data-theme='dark'] .checkin-container :is(.readiness-mini, .readiness-item, .inline-status) {
   background: rgba(15, 23, 42, 0.82) !important;
   border-color: rgba(51, 65, 85, 0.9) !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
-:global(body[data-theme='dark']) .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
-:global(:root[data-theme='dark']) .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done) {
+html[data-theme='dark'] .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
+body[data-theme='dark'] .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done),
+:root[data-theme='dark'] .checkin-container :is(.state-success, .inline-status.state-success, .readiness-mini.done) {
   background: rgba(6, 95, 70, 0.2) !important;
   border-color: rgba(16, 185, 129, 0.34) !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(.state-info, .inline-status.state-info),
-:global(body[data-theme='dark']) .checkin-container :is(.state-info, .inline-status.state-info),
-:global(:root[data-theme='dark']) .checkin-container :is(.state-info, .inline-status.state-info) {
+html[data-theme='dark'] .checkin-container :is(.state-info, .inline-status.state-info),
+body[data-theme='dark'] .checkin-container :is(.state-info, .inline-status.state-info),
+:root[data-theme='dark'] .checkin-container :is(.state-info, .inline-status.state-info) {
   background: rgba(37, 99, 235, 0.18) !important;
   border-color: rgba(96, 165, 250, 0.34) !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
-:global(body[data-theme='dark']) .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
-:global(:root[data-theme='dark']) .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending) {
+html[data-theme='dark'] .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
+body[data-theme='dark'] .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending),
+:root[data-theme='dark'] .checkin-container :is(.state-muted, .inline-status.state-muted, .readiness-mini.pending) {
   background: rgba(120, 53, 15, 0.2) !important;
   border-color: rgba(251, 146, 60, 0.34) !important;
 }
 
-:global(html[data-theme='dark']) .checkin-container .inline-status-icon,
-:global(body[data-theme='dark']) .checkin-container .inline-status-icon,
-:global(:root[data-theme='dark']) .checkin-container .inline-status-icon {
+html[data-theme='dark'] .checkin-container .inline-status-icon,
+body[data-theme='dark'] .checkin-container .inline-status-icon,
+:root[data-theme='dark'] .checkin-container .inline-status-icon {
   background: rgba(30, 41, 59, 0.94) !important;
   color: #93c5fd !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.readiness-card-compact, .action-callout-compact),
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.readiness-card-compact, .action-callout-compact),
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.readiness-card-compact, .action-callout-compact) {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.readiness-card-compact, .action-callout-compact),
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.readiness-card-compact, .action-callout-compact),
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.readiness-card-compact, .action-callout-compact) {
   background: linear-gradient(180deg, #020617 0%, #0b1220 100%) !important;
   border: 1px solid rgba(51, 65, 85, 0.96) !important;
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.36) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.readiness-head h5, .action-copy h5, .inline-status-copy strong, .readiness-mini strong),
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.readiness-head h5, .action-copy h5, .inline-status-copy strong, .readiness-mini strong),
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.readiness-head h5, .action-copy h5, .inline-status-copy strong, .readiness-mini strong) {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.readiness-head h5, .action-copy h5, .inline-status-copy strong, .readiness-mini strong),
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.readiness-head h5, .action-copy h5, .inline-status-copy strong, .readiness-mini strong),
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.readiness-head h5, .action-copy h5, .inline-status-copy strong, .readiness-mini strong) {
   color: #e2e8f0 !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.section-kicker, .readiness-mini p, .action-copy p, .inline-status-copy small),
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.section-kicker, .readiness-mini p, .action-copy p, .inline-status-copy small),
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper :is(.section-kicker, .readiness-mini p, .action-copy p, .inline-status-copy small) {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.section-kicker, .readiness-mini p, .action-copy p, .inline-status-copy small),
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.section-kicker, .readiness-mini p, .action-copy p, .inline-status-copy small),
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper :is(.section-kicker, .readiness-mini p, .action-copy p, .inline-status-copy small) {
   color: #94a3b8 !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini {
   background: #0f172a !important;
   border-color: rgba(51, 65, 85, 0.96) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.done,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.done,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.done {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.done,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.done,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.done {
   background: rgba(6, 78, 59, 0.2) !important;
   border-color: rgba(52, 211, 153, 0.34) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.pending,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.pending,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.pending {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.pending,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.pending,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.pending {
   background: rgba(124, 45, 18, 0.22) !important;
   border-color: rgba(251, 146, 60, 0.36) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .mini-index,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .mini-index,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .mini-index {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .mini-index,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .mini-index,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .mini-index {
   background: rgba(37, 99, 235, 0.22) !important;
   color: #bfdbfe !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.done .mini-index,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.done .mini-index,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.done .mini-index {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.done .mini-index,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.done .mini-index,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.done .mini-index {
   background: rgba(16, 185, 129, 0.22) !important;
   color: #a7f3d0 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.pending .mini-index,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.pending .mini-index,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .readiness-mini.pending .mini-index {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.pending .mini-index,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.pending .mini-index,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .readiness-mini.pending .mini-index {
   background: rgba(249, 115, 22, 0.22) !important;
   color: #fed7aa !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .inline-status,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .inline-status,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .inline-status {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .inline-status,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .inline-status,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .inline-status {
   background: #0f172a !important;
   border-color: rgba(51, 65, 85, 0.96) !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .btn-confirm,
-:global(body[data-theme='dark']) .checkin-container .checkin-mode-wrapper .btn-confirm,
-:global(:root[data-theme='dark']) .checkin-container .checkin-mode-wrapper .btn-confirm {
+html[data-theme='dark'] body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .btn-confirm,
+body[data-theme='dark'] .checkin-container .checkin-mode-wrapper .btn-confirm,
+:root[data-theme='dark'] .checkin-container .checkin-mode-wrapper .btn-confirm {
   background: linear-gradient(135deg, #1d4ed8 0%, #0f766e 100%) !important;
   color: #ffffff !important;
   box-shadow: 0 16px 34px rgba(29, 78, 216, 0.28) !important;

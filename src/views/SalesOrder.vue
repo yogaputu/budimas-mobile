@@ -127,63 +127,21 @@
             </div>
 
             <div class="item-action">
-              <div class="uom-grid">
-                <div class="uom-field" :class="{ 'uom-disabled': !isOrderUomEnabled(item, 'uom1') }">
-                  <label class="input-label">{{ getOrderUomLabel(item, 1) }}</label>
+              <div class="uom-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr))">
+                <div v-for="unit in productUoms(item)" :key="unit.id || unit.level" class="uom-field" :class="{ 'uom-disabled': !isOrderUomEnabled(item, unit.level) }">
+                  <label class="input-label">{{ getOrderUomLabel(item, unit.level) }}</label>
                   <div class="qty-box qty-box-compact">
-                    <button class="qty-btn qty-btn-minus" @click="changeUomQty(item, 'uom1', -1)" :disabled="!isOrderUomEnabled(item, 'uom1')" type="button">-</button>
-                    <input
-                      :ref="(el) => setQtyInputRef(`${item.Kode}:uom1`, el)"
-                      type="number"
-                      inputmode="numeric"
-                      :value="getCartUomValue(item.Kode, 'uom1') || ''"
-                      @input="updateUomQty(item, 'uom1', $event.target.value)"
-                      class="qty-input"
-                      placeholder="0"
-                      min="0"
-                      :disabled="!isOrderUomEnabled(item, 'uom1')"
-                    />
-                    <button class="qty-btn qty-btn-plus" @click="changeUomQty(item, 'uom1', 1)" :disabled="!isOrderUomEnabled(item, 'uom1')" type="button">+</button>
+                    <button class="qty-btn qty-btn-minus" @click="changeUomQty(item, `uom${unit.level}`, -1)" :disabled="!isOrderUomEnabled(item, unit.level)" type="button">-</button>
+                    <input :ref="el => setQtyInputRef(`${item.Kode}:uom${unit.level}`, el)"
+                      type="number" inputmode="numeric" min="0" step="1" placeholder="0" class="qty-input"
+                      :aria-label="`${item.Nama} — ${unit.nama}`"
+                      :value="getCartUomValue(item.Kode, `uom${unit.level}`) || ''"
+                      @input="updateUomQty(item, `uom${unit.level}`, $event.target.value)"
+                      :disabled="!isOrderUomEnabled(item, unit.level)" />
+                    <button class="qty-btn qty-btn-plus" @click="changeUomQty(item, `uom${unit.level}`, 1)" :disabled="!isOrderUomEnabled(item, unit.level)" type="button">+</button>
                   </div>
                 </div>
-
-                <div class="uom-field" :class="{ 'uom-disabled': !isOrderUomEnabled(item, 'uom2') }">
-                  <label class="input-label">{{ getOrderUomLabel(item, 2) }}</label>
-                  <div class="qty-box qty-box-compact">
-                    <button class="qty-btn qty-btn-minus" @click="changeUomQty(item, 'uom2', -1)" :disabled="!isOrderUomEnabled(item, 'uom2')" type="button">-</button>
-                    <input
-                      :ref="(el) => setQtyInputRef(`${item.Kode}:uom2`, el)"
-                      type="number"
-                      inputmode="numeric"
-                      :value="getCartUomValue(item.Kode, 'uom2') || ''"
-                      @input="updateUomQty(item, 'uom2', $event.target.value)"
-                      class="qty-input"
-                      placeholder="0"
-                      min="0"
-                      :disabled="!isOrderUomEnabled(item, 'uom2')"
-                    />
-                    <button class="qty-btn qty-btn-plus" @click="changeUomQty(item, 'uom2', 1)" :disabled="!isOrderUomEnabled(item, 'uom2')" type="button">+</button>
-                  </div>
-                </div>
-
-                <div class="uom-field" :class="{ 'uom-disabled': !isOrderUomEnabled(item, 'uom3') }">
-                  <label class="input-label">{{ getOrderUomLabel(item, 3) }}</label>
-                  <div class="qty-box qty-box-compact">
-                    <button class="qty-btn qty-btn-minus" @click="changeUomQty(item, 'uom3', -1)" :disabled="!isOrderUomEnabled(item, 'uom3')" type="button">-</button>
-                    <input
-                      :ref="(el) => setQtyInputRef(`${item.Kode}:uom3`, el)"
-                      type="number"
-                      inputmode="numeric"
-                      :value="getCartUomValue(item.Kode, 'uom3') || ''"
-                      @input="updateUomQty(item, 'uom3', $event.target.value)"
-                      class="qty-input"
-                      placeholder="0"
-                      min="0"
-                      :disabled="!isOrderUomEnabled(item, 'uom3')"
-                    />
-                    <button class="qty-btn qty-btn-plus" @click="changeUomQty(item, 'uom3', 1)" :disabled="!isOrderUomEnabled(item, 'uom3')" type="button">+</button>
-                  </div>
-                </div>
+                <p v-if="!productUoms(item).length" class="input-label">Master UOM belum tersedia.</p>
               </div>
 
               <div v-if="hasCartSelection(item.Kode)" class="uom-summary">
@@ -431,58 +389,17 @@
         </div>
 
         <div class="detail-form">
-          <div class="detail-uom-grid">
-            <div :class="{ 'uom-disabled': !isOrderUomEnabled(selectedItemDetail, 'uom1') }">
-              <label class="field-label">{{ getOrderUomLabel(selectedItemDetail, 1) }}</label>
+          <div class="detail-uom-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr))">
+            <div v-for="unit in productUoms(selectedItemDetail)" :key="unit.id || unit.level">
+              <label class="field-label">{{ getOrderUomLabel(selectedItemDetail, unit.level) }}</label>
               <div class="qty-box detail-qty-box">
-                <button class="qty-btn qty-btn-minus" @click="changeSelectedUomQty('uom1', -1)" :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom1')" type="button">-</button>
-                <input
-                  type="number"
-                  inputmode="numeric"
-                  :value="selectedItemDetail.uom1 || ''"
-                  @input="updateSelectedUomQty('uom1', $event.target.value)"
-                  min="0"
-                  class="qty-input"
-                  placeholder="0"
-                  :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom1')"
-                />
-                <button class="qty-btn qty-btn-plus" @click="changeSelectedUomQty('uom1', 1)" :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom1')" type="button">+</button>
-              </div>
-            </div>
-
-            <div :class="{ 'uom-disabled': !isOrderUomEnabled(selectedItemDetail, 'uom2') }">
-              <label class="field-label">{{ getOrderUomLabel(selectedItemDetail, 2) }}</label>
-              <div class="qty-box detail-qty-box">
-                <button class="qty-btn qty-btn-minus" @click="changeSelectedUomQty('uom2', -1)" :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom2')" type="button">-</button>
-                <input
-                  type="number"
-                  inputmode="numeric"
-                  :value="selectedItemDetail.uom2 || ''"
-                  @input="updateSelectedUomQty('uom2', $event.target.value)"
-                  min="0"
-                  class="qty-input"
-                  placeholder="0"
-                  :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom2')"
-                />
-                <button class="qty-btn qty-btn-plus" @click="changeSelectedUomQty('uom2', 1)" :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom2')" type="button">+</button>
-              </div>
-            </div>
-
-            <div :class="{ 'uom-disabled': !isOrderUomEnabled(selectedItemDetail, 'uom3') }">
-              <label class="field-label">{{ getOrderUomLabel(selectedItemDetail, 3) }}</label>
-              <div class="qty-box detail-qty-box">
-                <button class="qty-btn qty-btn-minus" @click="changeSelectedUomQty('uom3', -1)" :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom3')" type="button">-</button>
-                <input
-                  type="number"
-                  inputmode="numeric"
-                  :value="selectedItemDetail.uom3 || ''"
-                  @input="updateSelectedUomQty('uom3', $event.target.value)"
-                  min="0"
-                  class="qty-input"
-                  placeholder="0"
-                  :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom3')"
-                />
-                <button class="qty-btn qty-btn-plus" @click="changeSelectedUomQty('uom3', 1)" :disabled="!isOrderUomEnabled(selectedItemDetail, 'uom3')" type="button">+</button>
+                <button class="qty-btn qty-btn-minus" @click="changeSelectedUomQty(`uom${unit.level}`, -1)" :disabled="!isOrderUomEnabled(selectedItemDetail, unit.level)" type="button">-</button>
+                <input type="number" inputmode="numeric" min="0" step="1" placeholder="0" class="qty-input"
+                  :aria-label="`Detail ${unit.nama}`"
+                  :value="selectedItemDetail[`uom${unit.level}`] || ''"
+                  @input="updateSelectedUomQty(`uom${unit.level}`, $event.target.value)"
+                  :disabled="!isOrderUomEnabled(selectedItemDetail, unit.level)" />
+                <button class="qty-btn qty-btn-plus" @click="changeSelectedUomQty(`uom${unit.level}`, 1)" :disabled="!isOrderUomEnabled(selectedItemDetail, unit.level)" type="button">+</button>
               </div>
             </div>
           </div>
@@ -529,6 +446,7 @@
 </template>
 
 <script setup>
+import { productUoms, productUom, productUomLabel, productUomTotal, productUomQuantities, formatProductUomQty, emptyProductUomValues } from '@/utils/productUom';
 import { ref, onMounted, computed, nextTick, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/axios';
@@ -685,41 +603,13 @@ const pickOptionalNumber = (...values) => {
   return Number.isFinite(numberValue) ? numberValue : null;
 };
 
-const getOrderUomField = (fieldOrLevel) => {
-  if (fieldOrLevel === 'uom1' || Number(fieldOrLevel) === 1) return 'uom1';
-  if (fieldOrLevel === 'uom2' || Number(fieldOrLevel) === 2) return 'uom2';
-  if (fieldOrLevel === 'uom3' || Number(fieldOrLevel) === 3) return 'uom3';
-  return '';
+const getOrderUomField = (value) => {
+  const level = Number(String(value).replace(/^uom/, ''));
+  return Number.isInteger(level) && level > 0 ? `uom${level}` : '';
 };
-
-const getOrderUomLevel = (fieldOrLevel) => {
-  const field = getOrderUomField(fieldOrLevel);
-  if (field === 'uom1') return 1;
-  if (field === 'uom2') return 2;
-  if (field === 'uom3') return 3;
-  return 0;
-};
-
-const getOrderUomName = (item, level) => {
-  if (!item) return '';
-  if (level === 1) {
-    return pickText(item.uom1Label, item.Uom1Label, item.Satuan, item.puom1_nama, item.puom1_kode, item.uom_1, item.uom1_name);
-  }
-  if (level === 2) {
-    return pickText(item.uom2Label, item.Uom2Label, item.NamaUnit, item.puom2_nama, item.puom2_kode, item.uom_2, item.uom2_name);
-  }
-  if (level === 3) {
-    return pickText(item.uom3Label, item.Uom3Label, item.puom3_nama, item.puom3_kode, item.uom_3, item.uom3_name);
-  }
-  return '';
-};
-
-const getOrderUomConversion = (item, level) => {
-  if (level === 1) return 1;
-  if (level === 2) return pickNumber(item?.konversi2, item?.Konversi2, item?.konversi_2, item?.konversi_level2, item?.stok?.Konversi2, item?.stok?.konversi_2, item?.stok?.konversi_level2);
-  if (level === 3) return pickNumber(item?.konversi3, item?.Konversi3, item?.konversi_3, item?.konversi_level3, item?.stok?.Konversi3, item?.stok?.konversi_3, item?.stok?.konversi_level3);
-  return 0;
-};
+const getOrderUomLevel = value => Number(getOrderUomField(value).replace('uom', '')) || 0;
+const getOrderUomName = (item, level) => productUom(item, level)?.nama || '';
+const getOrderUomConversion = (item, level) => productUom(item, level)?.faktor_konversi || 0;
 
 const hasExplicitUomFlag = (item, field) => (
   Object.prototype.hasOwnProperty.call(item || {}, `has${field.charAt(0).toUpperCase()}${field.slice(1)}`) ||
@@ -755,35 +645,8 @@ const getCustomerRuleLabel = (item) => {
   return '';
 };
 
-const isOrderUomEnabled = (item, fieldOrLevel) => {
-  if (!item) return false;
-  if (isForbiddenOrder(item)) return false;
-  const field = getOrderUomField(fieldOrLevel);
-  const level = getOrderUomLevel(fieldOrLevel);
-  if (!field || !level) return false;
-
-  const camelFlag = `has${field.charAt(0).toUpperCase()}${field.slice(1)}`;
-  const pascalFlag = `Has${field.charAt(0).toUpperCase()}${field.slice(1)}`;
-  if (hasExplicitUomFlag(item, field)) {
-    return Boolean(item[camelFlag] ?? item[pascalFlag]);
-  }
-
-  const stok = item.stok || {};
-  if (hasExplicitUomFlag(stok, field)) {
-    return Boolean(stok[camelFlag] ?? stok[pascalFlag]);
-  }
-
-  const name = getOrderUomName(item, level) || getOrderUomName(stok, level);
-  if (!hasText(name)) return false;
-  return level === 1 || getOrderUomConversion(item, level) > 0;
-};
-
-const getOrderUomLabel = (item, level) => {
-  const name = getOrderUomName(item, level) || getOrderUomName(item?.stok, level);
-  if (!isOrderUomEnabled(item, level)) return `UOM ${level} belum diset`;
-  if (level === 1) return name;
-  return `${name} x ${formatNumber(getOrderUomConversion(item, level))}`;
-};
+const isOrderUomEnabled = (item, value) => Boolean(item && !isForbiddenOrder(item) && productUom(item, getOrderUomLevel(value)));
+const getOrderUomLabel = (item, level) => productUomLabel(item, level);
 
 const buildOrderUomFlags = (item = {}) => {
   const uom1Name = pickText(item.Uom1Label, item.Satuan, item.puom1_nama, item.puom1_kode, item.uom_1, item.uom1_name);
@@ -793,6 +656,7 @@ const buildOrderUomFlags = (item = {}) => {
   const konversi3 = pickNumber(item.Konversi3, item.konversi_3, item.konversi3, item.konversi_level3);
 
   return {
+    uoms: productUoms(item),
     hasUom1: hasText(uom1Name),
     hasUom2: hasText(uom2Name) && konversi2 > 0,
     hasUom3: hasText(uom3Name) && konversi3 > 0,
@@ -804,29 +668,9 @@ const buildOrderUomFlags = (item = {}) => {
   };
 };
 
-const computeTotalPiecesFromEntry = (entry) => {
-  const uom1 = isOrderUomEnabled(entry, 'uom1') ? Number(entry?.uom1 || 0) : 0;
-  const uom2 = isOrderUomEnabled(entry, 'uom2') ? Number(entry?.uom2 || 0) : 0;
-  const uom3 = isOrderUomEnabled(entry, 'uom3') ? Number(entry?.uom3 || 0) : 0;
-  const konversi2 = Number(entry?.konversi2 || 0);
-  const konversi3 = Number(entry?.konversi3 || 0);
-  return uom1 + (uom2 * konversi2) + (uom3 * konversi3);
-};
-
-const hasEntrySelection = (entry) => (
-  (isOrderUomEnabled(entry, 'uom1') && Number(entry?.uom1 || 0) > 0) ||
-  (isOrderUomEnabled(entry, 'uom2') && Number(entry?.uom2 || 0) > 0) ||
-  (isOrderUomEnabled(entry, 'uom3') && Number(entry?.uom3 || 0) > 0)
-);
-
-const formatEntryUomSummary = (entry) => {
-  if (!entry) return '-';
-  const parts = [];
-  if (isOrderUomEnabled(entry, 'uom1') && Number(entry.uom1 || 0) > 0) parts.push(`${formatNumber(entry.uom1)} ${entry.uom1Label || 'PCS'}`);
-  if (isOrderUomEnabled(entry, 'uom2') && Number(entry.uom2 || 0) > 0) parts.push(`${formatNumber(entry.uom2)} ${entry.uom2Label || 'BOX'}`);
-  if (isOrderUomEnabled(entry, 'uom3') && Number(entry.uom3 || 0) > 0) parts.push(`${formatNumber(entry.uom3)} ${entry.uom3Label || 'KARTON'}`);
-  return parts.length > 0 ? parts.join(' | ') : '-';
-};
+const computeTotalPiecesFromEntry = entry => !entry || isForbiddenOrder(entry) ? 0 : productUomTotal(entry);
+const hasEntrySelection = entry => computeTotalPiecesFromEntry(entry) > 0;
+const formatEntryUomSummary = entry => entry ? formatProductUomQty(entry) : '-';
 
 const getStockAvailability = (entry) => {
   // StokAkhir is the shop's opname/history, not warehouse inventory.  Only
@@ -1180,6 +1024,8 @@ const createCartEntry = (itemOrKode = {}) => {
     uom1: 0,
     uom2: 0,
     uom3: 0,
+    ...emptyProductUomValues(typeof itemOrKode === 'string' ? {} : itemOrKode),
+    uoms: flags?.uoms || [],
     uom1Label: typeof itemOrKode === 'string' ? 'UOM 1' : flags.Uom1Label,
     uom2Label: typeof itemOrKode === 'string' ? 'UOM 2' : flags.Uom2Label,
     uom3Label: typeof itemOrKode === 'string' ? 'UOM 3' : flags.Uom3Label,
@@ -1237,6 +1083,7 @@ const hydrateCartEntry = (item) => {
       ...cart.value[cleanKode],
       kode: cleanKode,
       nama: cart.value[cleanKode].nama || String(item.Nama || '').trim(),
+      uoms: flags.uoms,
       uom1Label: flags.Uom1Label,
       uom2Label: flags.Uom2Label,
       uom3Label: flags.Uom3Label,
@@ -1260,6 +1107,7 @@ const clearCartAfterSubmit = async () => {
       uom1: 0,
       uom2: 0,
       uom3: 0,
+      ...emptyProductUomValues(nextCart[key]),
       isBonus: false,
       disc1: 0,
       disc2: 0,
@@ -1500,6 +1348,7 @@ const openItemDetail = (item) => {
 
   entry.nama = String(item.Nama || '').trim();
   entry.uom1Label = flags.Uom1Label;
+  entry.uoms = flags.uoms;
   entry.uom2Label = flags.Uom2Label;
   entry.uom3Label = flags.Uom3Label;
   entry.konversi2 = Number(flags.Konversi2 || 0);
@@ -1573,6 +1422,7 @@ const removeSelectedItem = async () => {
       uom1: 0,
       uom2: 0,
       uom3: 0,
+      ...emptyProductUomValues(cart.value[kode]),
       isBonus: false,
       disc1: 0,
       disc2: 0,
@@ -1649,6 +1499,8 @@ const buildPromoPreviewPayload = () => {
       pieces_order: isOrderUomEnabled(item, 'uom1') ? Number(item.uom1 || 0) : 0,
       box_order: isOrderUomEnabled(item, 'uom2') ? Number(item.uom2 || 0) : 0,
       karton_order: isOrderUomEnabled(item, 'uom3') ? Number(item.uom3 || 0) : 0,
+      uom_quantities: productUomQuantities(item),
+      total_pieces: productUomTotal(item),
       konversi_2: isOrderUomEnabled(item, 'uom2') ? Number(item.konversi2 || 0) : 0,
       konversi_3: isOrderUomEnabled(item, 'uom3') ? Number(item.konversi3 || 0) : 0,
       subtotalorder: computeLineTotalFromEntry(item)
@@ -1776,6 +1628,7 @@ const buildOrderPayload = () => {
       pieces_order: piecesOrder,
       box_order: boxOrder,
       karton_order: kartonOrder,
+      uom_quantities: productUomQuantities(i),
       unit: boxOrder,
       satuan: piecesOrder,
       unit_order: boxOrder,
@@ -2288,6 +2141,7 @@ const updateUomQty = async (item, field, value) => {
 
   entry.nama = String(item.Nama || '').trim();
   entry.uom1Label = flags.Uom1Label;
+  entry.uoms = flags.uoms;
   entry.uom2Label = flags.Uom2Label;
   entry.uom3Label = flags.Uom3Label;
   entry.konversi2 = Number(flags.Konversi2 || 0);
@@ -3685,88 +3539,88 @@ onBeforeUnmount(() => {
   }
 }
 
-:global(:root[data-theme='dark']) .page-wrapper,
-:global(:root[data-theme='dark']) .so-container,
-:global(:root[data-theme='dark']) .scroll-area {
+:root[data-theme='dark'] .page-wrapper,
+:root[data-theme='dark'] .so-container,
+:root[data-theme='dark'] .scroll-area {
   background: #020617 !important;
 }
 
-:global(:root[data-theme='dark']) .fixed-nav-wrapper,
-:global(:root[data-theme='dark']) .customer-card,
-:global(:root[data-theme='dark']) .stock-card,
-:global(:root[data-theme='dark']) .summary-bar,
-:global(:root[data-theme='dark']) .summary-detail-card,
-:global(:root[data-theme='dark']) .page-control-card,
-:global(:root[data-theme='dark']) .form-card,
-:global(:root[data-theme='dark']) .info-card,
-:global(:root[data-theme='dark']) .detail-sheet,
-:global(:root[data-theme='dark']) .detail-box,
-:global(:root[data-theme='dark']) .bonus-box {
+:root[data-theme='dark'] .fixed-nav-wrapper,
+:root[data-theme='dark'] .customer-card,
+:root[data-theme='dark'] .stock-card,
+:root[data-theme='dark'] .summary-bar,
+:root[data-theme='dark'] .summary-detail-card,
+:root[data-theme='dark'] .page-control-card,
+:root[data-theme='dark'] .form-card,
+:root[data-theme='dark'] .info-card,
+:root[data-theme='dark'] .detail-sheet,
+:root[data-theme='dark'] .detail-box,
+:root[data-theme='dark'] .bonus-box {
   background: #0f172a !important;
   border-color: #334155 !important;
   box-shadow: 0 18px 34px rgba(2, 6, 23, 0.34) !important;
 }
 
-:global(:root[data-theme='dark']) .summary-mini-item,
-:global(:root[data-theme='dark']) .tab-btn,
-:global(:root[data-theme='dark']) .search-input,
-:global(:root[data-theme='dark']) .qty-input,
-:global(:root[data-theme='dark']) .page-btn,
-:global(:root[data-theme='dark']) .unit-select,
-:global(:root[data-theme='dark']) .pending-bar,
-:global(:root[data-theme='dark']) .btn-close-sheet {
+:root[data-theme='dark'] .summary-mini-item,
+:root[data-theme='dark'] .tab-btn,
+:root[data-theme='dark'] .search-input,
+:root[data-theme='dark'] .qty-input,
+:root[data-theme='dark'] .page-btn,
+:root[data-theme='dark'] .unit-select,
+:root[data-theme='dark'] .pending-bar,
+:root[data-theme='dark'] .btn-close-sheet {
   background: #111827 !important;
   border-color: #334155 !important;
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .item-name-full,
-:global(:root[data-theme='dark']) .header-title h3,
-:global(:root[data-theme='dark']) .detail-sheet-head h3,
-:global(:root[data-theme='dark']) .detail-box strong,
-:global(:root[data-theme='dark']) .blue-detail-subtotal strong,
-:global(:root[data-theme='dark']) .summary-pill strong,
-:global(:root[data-theme='dark']) .summary-mini-item strong {
+:root[data-theme='dark'] .item-name-full,
+:root[data-theme='dark'] .header-title h3,
+:root[data-theme='dark'] .detail-sheet-head h3,
+:root[data-theme='dark'] .detail-box strong,
+:root[data-theme='dark'] .blue-detail-subtotal strong,
+:root[data-theme='dark'] .summary-pill strong,
+:root[data-theme='dark'] .summary-mini-item strong {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .page-info strong {
+:root[data-theme='dark'] .page-info strong {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .page-info span {
+:root[data-theme='dark'] .page-info span {
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .header-title p,
-:global(:root[data-theme='dark']) .detail-sheet-head p,
-:global(:root[data-theme='dark']) .item-code,
-:global(:root[data-theme='dark']) .detail-box span,
-:global(:root[data-theme='dark']) .discount-row label,
-:global(:root[data-theme='dark']) .summary-pill small,
-:global(:root[data-theme='dark']) .summary-mini-item span,
-:global(:root[data-theme='dark']) .slide-hint {
+:root[data-theme='dark'] .header-title p,
+:root[data-theme='dark'] .detail-sheet-head p,
+:root[data-theme='dark'] .item-code,
+:root[data-theme='dark'] .detail-box span,
+:root[data-theme='dark'] .discount-row label,
+:root[data-theme='dark'] .summary-pill small,
+:root[data-theme='dark'] .summary-mini-item span,
+:root[data-theme='dark'] .slide-hint {
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .tab-btn.active,
-:global(:root[data-theme='dark']) .stock-card.is-filled,
-:global(:root[data-theme='dark']) .blue-detail-subtotal {
+:root[data-theme='dark'] .tab-btn.active,
+:root[data-theme='dark'] .stock-card.is-filled,
+:root[data-theme='dark'] .blue-detail-subtotal {
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(30, 64, 175, 0.22)) !important;
   border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
-:global(:root[data-theme='dark']) .slide-checkout-wrapper {
+:root[data-theme='dark'] .slide-checkout-wrapper {
   background: linear-gradient(135deg, #0f172a 0%, #172554 100%) !important;
   border-color: rgba(59, 130, 246, 0.28) !important;
 }
 
-:global(:root[data-theme='dark']) .loader-mini-blue {
+:root[data-theme='dark'] .loader-mini-blue {
   border-color: #1e293b !important;
   border-top-color: #60a5fa !important;
 }
 
-:global(:root[data-theme='dark']) .btn-delete-item {
+:root[data-theme='dark'] .btn-delete-item {
   background: rgba(127, 29, 29, 0.2) !important;
   color: #fca5a5 !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
@@ -4084,4 +3938,3 @@ body[data-theme='dark'] .swal-stock-warning small {
   opacity: 1 !important;
 }
 </style>
-

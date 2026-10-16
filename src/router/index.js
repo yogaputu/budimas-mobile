@@ -134,9 +134,10 @@ const routes = [
   {
     path: '/payment',
     name: 'Payment',
-    component: () => import('@/views/Payment.vue'),
+    component: () => import('@/views/CollectionPaymentPage.vue'),
     meta: { requiresAuth: true }
   },
+  { path: '/payment-legacy', name: 'PaymentLegacy', component: () => import('@/views/Payment.vue'), meta: { requiresAuth: true } },
   {
     path: '/retur-page',
     name: 'ReturPage',

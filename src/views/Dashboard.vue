@@ -13,7 +13,7 @@
 
   <div
     ref="dashboardContainer"
-    class="dashboard-container"
+    class="dashboard-container sales-ui sales-dashboard"
     @touchstart.passive="handleTouchStart"
     @touchmove.passive="handleTouchMove"
     @touchend.passive="handleTouchEnd"
@@ -91,17 +91,15 @@
 
       <div class="hero-meta-row">
         <div class="hero-meta-card">
-          <span class="hero-meta-label">Update Data</span>
+          <span class="hero-meta-label">Pembaruan terakhir</span>
           <strong>{{ lastUpdatedLabel }}</strong>
         </div>
-        <div class="hero-meta-card">
-          <span class="hero-meta-label">Aksi Berikutnya</span>
-          <strong>{{ nextActionLabel }}</strong>
-        </div>
+
       </div>
     </header>
 
     <main class="main-content">
+      <p v-if="dashboardError" role="alert" class="sales-notice warning">{{ dashboardError }}</p>
       <section v-if="activeVisitCard" class="active-visit-card">
         <div class="active-visit-head">
           <div>
@@ -127,15 +125,7 @@
         </div>
       </section>
 
-      <section class="menu-section priority-menu">
-        <div class="section-header compact-section-header">
-          <div>
-            <p class="section-eyebrow">Aktivitas Utama</p>
-            <h3 class="section-title">Navigasi Cepat</h3>
-          </div>
-        </div>
-
-        <div class="main-btn premium-main-btn" @click="handleKunjungan">
+        <button type="button" class="main-btn premium-main-btn" @click="handleKunjungan">
           <div class="btn-icon btn-icon-primary">
             <font-awesome-icon icon="map-marked-alt" />
           </div>
@@ -146,52 +136,7 @@
           <div class="btn-arrow">
             <font-awesome-icon icon="chevron-right" />
           </div>
-        </div>
-
-        <div class="sub-menu-grid">
-          <div class="sub-item" @click="router.push('/registrasi-toko')">
-            <div class="si-icon b-blue">
-              <font-awesome-icon icon="store-alt" />
-            </div>
-            <span>Registrasi</span>
-          </div>
-          <div class="sub-item" @click="router.push('/cari-toko')">
-            <div class="si-icon b-orange">
-              <font-awesome-icon icon="search" />
-            </div>
-            <span>Cari Toko</span>
-          </div>
-          <div class="sub-item" @click="handleHistory">
-            <div class="si-icon b-purple">
-              <font-awesome-icon icon="history" />
-            </div>
-            <span>Riwayat</span>
-          </div>
-          <div class="sub-item" @click="router.push('/lph-kuitansi')">
-            <div class="si-icon b-blue"><font-awesome-icon icon="clipboard-check" /></div>
-            <span>LPH & Klaim Pembayaran</span>
-          </div>
-          <div class="sub-item" @click="router.push('/lph')">
-            <div class="si-icon b-blue">
-              <font-awesome-icon icon="clipboard-check" />
-            </div>
-            <span>LPH</span>
-          </div>
-          <div v-if="isCanvasSales" class="sub-item" @click="router.push({ path: '/sales-canvas', query: { mode: 'request', source: 'dashboard' } })">
-            <div class="si-icon b-green">
-              <font-awesome-icon icon="boxes" />
-            </div>
-            <span>Canvas</span>
-          </div>
-          <div class="sub-item" @click="router.push('/profile')">
-            <div class="si-icon b-gray">
-              <font-awesome-icon icon="user-shield" />
-            </div>
-            <span>Profil</span>
-          </div>
-        </div>
-      </section>
-
+        </button>
       <section class="kpi-section">
         <div class="section-header">
           <div>
@@ -216,7 +161,7 @@
               <font-awesome-icon icon="map-marker-alt" />
             </div>
             <div class="stat-text">
-              <span class="stat-label">Active Trx</span>
+              <span class="stat-label">Dikunjungi</span>
               <strong class="stat-value">{{ summary.totalAT }}</strong>
             </div>
           </div>
@@ -226,27 +171,123 @@
               <font-awesome-icon icon="check-double" />
             </div>
             <div class="stat-text">
-              <span class="stat-label">Effective</span>
+              <span class="stat-label">Selesai</span>
               <strong class="stat-value">{{ summary.totalECO }}</strong>
             </div>
           </div>
         </div>
       </section>
-
-      <section class="focus-strip">
-        <div class="focus-card">
-          <span class="focus-label">Progress Target</span>
-          <strong>{{ achievementPercentage }}%</strong>
-          <small>{{ formatCompactRupiah(ValueOrder) }} dari {{ formatCompactRupiah(targetSales) }}</small>
+      <section class="performance-card premium-card">
+        <div class="perf-header">
+          <div>
+            <p class="section-eyebrow">Performa</p>
+            <span class="perf-title">Ringkasan Sales</span>
+          </div>
+          <span class="perf-period">{{ currentMonthName }}</span>
         </div>
-        <div class="focus-card">
-          <span class="focus-label">Average Order</span>
-          <strong>{{ formatCompactRupiah(orderAverageValue) }}</strong>
-          <small>{{ dashboardStats.completed }} outlet checkout</small>
+
+        <div class="target-block">
+          <div>
+            <small class="muted-label">Target Sales</small>
+            <h3>{{ formatRupiah(targetSales) }}</h3>
+          </div>
+          <div class="target-achievement">
+            <span>{{ achievementPercentage }}%</span>
+          </div>
+        </div>
+
+        <div class="value-row premium-row">
+          <div class="value-box">
+            <small>Realisasi Omzet</small>
+            <p class="blue">{{ formatRupiah(ValueOrder) }}</p>
+          </div>
+          <div class="value-box">
+            <small>Nilai Faktur</small>
+            <p class="green">{{ formatRupiah(ValueFaktur) }}</p>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="prog-info">
+            <span>Pencapaian omzet</span>
+            <span class="fw-bold">{{ achievementPercentage }}%</span>
+          </div>
+          <div class="prog-bar-bg">
+            <div class="prog-fill purple-fill" :style="{ width: achievementBarWidth + '%' }"></div>
+          </div>
+        </div>
+
+        <div class="progress-section mt-3">
+          <div class="prog-info">
+            <span>Pencapaian kunjungan</span>
+            <span class="fw-bold">{{ monthlySummary.totalECF }}%</span>
+          </div>
+          <div class="prog-bar-bg">
+            <div class="prog-fill green-fill" :style="{ width: ecfBarWidth + '%' }"></div>
+          </div>
+        </div>
+
+      </section>
+      <section class="menu-section priority-menu">
+        <div class="section-header compact-section-header">
+          <div>
+            <p class="section-eyebrow">Aktivitas Utama</p>
+            <h3 class="section-title">Navigasi Cepat</h3>
+          </div>
+        </div>
+
+
+
+        <div class="sub-menu-grid">
+          <button type="button" class="sub-item" @click="router.push('/payment')"><div class="si-icon b-green"><font-awesome-icon icon="money-bill-wave" /></div><span class="menu-copy"><strong>Pembayaran</strong><small>Catat penerimaan customer</small></span></button>
+          <button type="button" class="sub-item" @click="router.push('/registrasi-toko')">
+            <div class="si-icon b-blue">
+              <font-awesome-icon icon="store-alt" />
+            </div>
+            <span class="menu-copy"><strong>Registrasi Toko</strong><small>Daftarkan outlet baru</small></span>
+          </button>
+          <button type="button" class="sub-item" @click="router.push('/cari-toko')">
+            <div class="si-icon b-orange">
+              <font-awesome-icon icon="search" />
+            </div>
+            <span class="menu-copy"><strong>Cari Toko</strong><small>Temukan data outlet</small></span>
+          </button>
+          <button type="button" class="sub-item" @click="handleHistory">
+            <div class="si-icon b-purple">
+              <font-awesome-icon icon="history" />
+            </div>
+            <span class="menu-copy"><strong>Riwayat</strong><small>Aktivitas kunjungan</small></span>
+          </button>
+          <button type="button" class="sub-item" @click="router.push('/lph-kuitansi')">
+            <div class="si-icon b-blue"><font-awesome-icon icon="clipboard-check" /></div>
+            <span class="menu-copy"><strong>LPH</strong><small>Terima, rekap & kembalikan</small></span>
+          </button>
+          <button type="button" class="sub-item" @click="router.push('/lph')">
+            <div class="si-icon b-blue">
+              <font-awesome-icon icon="clipboard-check" />
+            </div>
+            <span class="menu-copy"><strong>LPH Sebelumnya</strong><small>Dokumen alur lama</small></span>
+          </button>
+          <button v-if="isCanvasSales" type="button" class="sub-item" @click="router.push({ path: '/sales-canvas', query: { mode: 'request', source: 'dashboard' } })">
+            <div class="si-icon b-green">
+              <font-awesome-icon icon="boxes" />
+            </div>
+            <span class="menu-copy"><strong>Sales Canvas</strong><small>Stok & transaksi canvas</small></span>
+          </button>
+          <button type="button" class="sub-item" @click="router.push('/profile')">
+            <div class="si-icon b-gray">
+              <font-awesome-icon icon="user-shield" />
+            </div>
+            <span class="menu-copy"><strong>Profil</strong><small>Informasi akun sales</small></span>
+          </button>
         </div>
       </section>
 
-      <section class="kpi-section">
+
+
+
+
+      <details class="sales-surface dashboard-monthly"><summary>Rincian kunjungan bulan berjalan</summary>
         <div class="section-header">
           <div>
             <p class="section-eyebrow">Bulan Berjalan</p>
@@ -284,103 +325,11 @@
             <div class="mtd-val">{{ monthlySummary.totalECF }}</div>
           </div>
         </div>
-      </section>
+      </details>
 
-      <section class="insight-panel">
-        <div class="section-header">
-          <div>
-            <p class="section-eyebrow">Operasional</p>
-            <h3 class="section-title">Ringkasan Lapangan</h3>
-          </div>
-        </div>
 
-        <div class="insight-grid">
-          <div class="insight-card">
-            <span class="insight-label">Sudah Visit</span>
-            <strong>{{ dashboardStats.visited }}</strong>
-            <small>{{ dashboardStats.visitRate }}% dari call plan</small>
-          </div>
-          <div class="insight-card">
-            <span class="insight-label">Masih Aktif</span>
-            <strong>{{ dashboardStats.active }}</strong>
-            <small>{{ dashboardStats.activeText }}</small>
-          </div>
-          <div class="insight-card">
-            <span class="insight-label">Selesai Checkout</span>
-            <strong>{{ dashboardStats.completed }}</strong>
-            <small>{{ dashboardStats.completedText }}</small>
-          </div>
-          <div class="insight-card">
-            <span class="insight-label">Tanpa Transaksi</span>
-            <strong>{{ dashboardStats.noTransaction }}</strong>
-            <small>{{ dashboardStats.noTransactionText }}</small>
-          </div>
-        </div>
-      </section>
 
-      <section class="performance-card premium-card">
-        <div class="perf-header">
-          <div>
-            <p class="section-eyebrow">Performa</p>
-            <span class="perf-title">Ringkasan Sales</span>
-          </div>
-          <span class="perf-period">{{ currentMonthName }}</span>
-        </div>
 
-        <div class="target-block">
-          <div>
-            <small class="muted-label">Target Sales</small>
-            <h3>{{ formatRupiah(targetSales) }}</h3>
-          </div>
-          <div class="target-achievement">
-            <span>{{ achievementPercentage }}%</span>
-          </div>
-        </div>
-
-        <div class="value-row premium-row">
-          <div class="value-box">
-            <small>Order Bulan Ini</small>
-            <p class="blue">{{ formatRupiah(ValueOrder) }}</p>
-          </div>
-          <div class="value-box">
-            <small>Faktur Bulan Ini</small>
-            <p class="green">{{ formatRupiah(ValueFaktur) }}</p>
-          </div>
-        </div>
-
-        <div class="progress-section">
-          <div class="prog-info">
-            <span>Target Achieved</span>
-            <span class="fw-bold">{{ achievementPercentage }}%</span>
-          </div>
-          <div class="prog-bar-bg">
-            <div class="prog-fill purple-fill" :style="{ width: achievementBarWidth + '%' }"></div>
-          </div>
-        </div>
-
-        <div class="progress-section mt-3">
-          <div class="prog-info">
-            <span>Kunjungan (ECF)</span>
-            <span class="fw-bold">{{ monthlySummary.totalECF }}%</span>
-          </div>
-          <div class="prog-bar-bg">
-            <div class="prog-fill green-fill" :style="{ width: ecfBarWidth + '%' }"></div>
-          </div>
-        </div>
-
-        <div class="value-row premium-row secondary-row">
-          <div class="value-box soft-box">
-            <small>Average Order</small>
-            <p>{{ formatCompactRupiah(orderAverageValue) }}</p>
-          </div>
-          <div class="value-box soft-box">
-            <small>Gap ke Target</small>
-            <p :class="remainingTargetValue > 0 ? 'orange' : 'green'">
-              {{ formatCompactRupiah(remainingTargetValue) }}
-            </p>
-          </div>
-        </div>
-      </section>
 
       <!-- <section class="sync-panel">
         <div class="section-header">
@@ -467,6 +416,7 @@ const profile = ref(null);
 const canCheckIn = ref(true);
 const isInitialLoading = ref(true);
 const loading = ref(false);
+const dashboardError = ref('');
 const INITIAL_LOADING_MAX_MS = 8000;
 let initialLoadingTimer = null;
 
@@ -930,6 +880,7 @@ const refreshData = async ({ silent = false } = {}) => {
       console.warn('⚠️ Sync online tidak penuh:', syncResult.message);
     }
 
+    dashboardError.value = '';
     console.log('🌐 Dashboard: Mengambil data server...');
 
     const [canCheckInResult, profileRes, targetRes, atmdRes, monthlyTargetRes, daftar] = await Promise.all([
@@ -1030,11 +981,7 @@ const refreshData = async ({ silent = false } = {}) => {
     if (!connectivity.isOnline) {
       await loadDataFromSQLite();
     } else {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Server Error',
-        text: 'Gagal mengambil data terbaru dari server.'
-      });
+      dashboardError.value = 'Data terbaru belum dapat dimuat. Tarik layar untuk mencoba lagi; angka tersimpan mungkin belum terbaru.';
     }
   } finally {
     loading.value = false;
@@ -3082,74 +3029,74 @@ onMounted(async () => {
   }
 }
 
-:global(:root[data-theme='dark']) .dashboard-container,
-:global(:root[data-theme='dark']) .scroll-area {
+:root[data-theme='dark'] .dashboard-container,
+:root[data-theme='dark'] .scroll-area {
   background: #020617 !important;
 }
 
-:global(:root[data-theme='dark']) .hero-header {
+:root[data-theme='dark'] .hero-header {
   box-shadow: 0 24px 48px rgba(2, 6, 23, 0.5) !important;
 }
 
-:global(:root[data-theme='dark']) .hero-grid {
+:root[data-theme='dark'] .hero-grid {
   opacity: 0.12 !important;
 }
 
-:global(:root[data-theme='dark']) .hero-summary-card {
+:root[data-theme='dark'] .hero-summary-card {
   background: rgba(15, 23, 42, 0.58) !important;
   border-color: rgba(148, 163, 184, 0.2) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
 }
 
-:global(:root[data-theme='dark']) .focus-card,
-:global(:root[data-theme='dark']) .sync-card,
-:global(:root[data-theme='dark']) .sub-item {
+:root[data-theme='dark'] .focus-card,
+:root[data-theme='dark'] .sync-card,
+:root[data-theme='dark'] .sub-item {
   background: linear-gradient(180deg, #0f172a, #111827) !important;
   border-color: rgba(51, 65, 85, 0.9) !important;
   box-shadow: 0 16px 32px rgba(2, 6, 23, 0.32) !important;
 }
 
-:global(:root[data-theme='dark']) .focus-label,
-:global(:root[data-theme='dark']) .sync-card small {
+:root[data-theme='dark'] .focus-label,
+:root[data-theme='dark'] .sync-card small {
   color: #94a3b8 !important;
 }
 
-:global(:root[data-theme='dark']) .focus-card strong,
-:global(:root[data-theme='dark']) .sync-card strong {
+:root[data-theme='dark'] .focus-card strong,
+:root[data-theme='dark'] .sync-card strong {
   color: #e2e8f0 !important;
 }
 
-:global(:root[data-theme='dark']) .focus-card small {
+:root[data-theme='dark'] .focus-card small {
   color: #64748b !important;
 }
 
-:global(:root[data-theme='dark']) .sync-chip {
+:root[data-theme='dark'] .sync-chip {
   background: rgba(37, 99, 235, 0.18) !important;
   color: #93c5fd !important;
 }
 
-:global(:root[data-theme='dark']) .icon-blue {
+:root[data-theme='dark'] .icon-blue {
   background: rgba(59, 130, 246, 0.16) !important;
   color: #93c5fd !important;
 }
 
-:global(:root[data-theme='dark']) .icon-green {
+:root[data-theme='dark'] .icon-green {
   background: rgba(16, 185, 129, 0.16) !important;
   color: #6ee7b7 !important;
 }
 
-:global(:root[data-theme='dark']) .icon-purple {
+:root[data-theme='dark'] .icon-purple {
   background: rgba(124, 58, 237, 0.16) !important;
   color: #c4b5fd !important;
 }
 
-:global(:root[data-theme='dark']) .btn-icon-primary {
+:root[data-theme='dark'] .btn-icon-primary {
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(29, 78, 216, 0.12)) !important;
   color: #93c5fd !important;
 }
 
 /* Dashboard true-dark pass: this block intentionally wins over older duplicated dashboard styles. */
-:global(:root[data-theme='dark']) .dashboard-container {
+:root[data-theme='dark'] .dashboard-container {
   --bg: #000814;
   --card: #030712;
   --text: #f8fafc;
@@ -3161,145 +3108,145 @@ onMounted(async () => {
   color: #f8fafc !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .hero-header {
+:root[data-theme='dark'] .dashboard-container .hero-header {
   background:
     radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 28%),
     linear-gradient(135deg, #020617 0%, #07111f 48%, #0b1d3a 100%) !important;
   box-shadow: 0 28px 54px rgba(0, 0, 0, 0.72) !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .hero-overlay {
+:root[data-theme='dark'] .dashboard-container .hero-overlay {
   background:
     radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 24%),
     radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.08), transparent 28%) !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .hero-summary-card,
-:global(:root[data-theme='dark']) .dashboard-container .hero-meta-card,
-:global(:root[data-theme='dark']) .dashboard-container .active-visit-card,
-:global(:root[data-theme='dark']) .dashboard-container .stat-card,
-:global(:root[data-theme='dark']) .dashboard-container .focus-card,
-:global(:root[data-theme='dark']) .dashboard-container .mtd-card,
-:global(:root[data-theme='dark']) .dashboard-container .insight-panel,
-:global(:root[data-theme='dark']) .dashboard-container .insight-card,
-:global(:root[data-theme='dark']) .dashboard-container .performance-card,
-:global(:root[data-theme='dark']) .dashboard-container .premium-card,
-:global(:root[data-theme='dark']) .dashboard-container .premium-main-btn,
-:global(:root[data-theme='dark']) .dashboard-container .sub-item,
-:global(:root[data-theme='dark']) .dashboard-container .sync-panel,
-:global(:root[data-theme='dark']) .dashboard-container .sync-card,
-:global(:root[data-theme='dark']) .dashboard-container .value-box,
-:global(:root[data-theme='dark']) .dashboard-container .active-chip {
+:root[data-theme='dark'] .dashboard-container .hero-summary-card,
+:root[data-theme='dark'] .dashboard-container .hero-meta-card,
+:root[data-theme='dark'] .dashboard-container .active-visit-card,
+:root[data-theme='dark'] .dashboard-container .stat-card,
+:root[data-theme='dark'] .dashboard-container .focus-card,
+:root[data-theme='dark'] .dashboard-container .mtd-card,
+:root[data-theme='dark'] .dashboard-container .insight-panel,
+:root[data-theme='dark'] .dashboard-container .insight-card,
+:root[data-theme='dark'] .dashboard-container .performance-card,
+:root[data-theme='dark'] .dashboard-container .premium-card,
+:root[data-theme='dark'] .dashboard-container .premium-main-btn,
+:root[data-theme='dark'] .dashboard-container .sub-item,
+:root[data-theme='dark'] .dashboard-container .sync-panel,
+:root[data-theme='dark'] .dashboard-container .sync-card,
+:root[data-theme='dark'] .dashboard-container .value-box,
+:root[data-theme='dark'] .dashboard-container .active-chip {
   background: linear-gradient(180deg, #030712 0%, #070f1d 100%) !important;
   border-color: rgba(51, 65, 85, 0.9) !important;
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.48) !important;
   color: #f8fafc !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .hero-summary-card,
-:global(:root[data-theme='dark']) .dashboard-container .hero-meta-card {
+:root[data-theme='dark'] .dashboard-container .hero-summary-card,
+:root[data-theme='dark'] .dashboard-container .hero-meta-card {
   background: rgba(2, 6, 23, 0.72) !important;
   border-color: rgba(148, 163, 184, 0.22) !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .welcome-text,
-:global(:root[data-theme='dark']) .dashboard-container .hero-date,
-:global(:root[data-theme='dark']) .dashboard-container .hero-summary-label,
-:global(:root[data-theme='dark']) .dashboard-container .hero-summary-subtitle,
-:global(:root[data-theme='dark']) .dashboard-container .hero-meta-label,
-:global(:root[data-theme='dark']) .dashboard-container .section-eyebrow,
-:global(:root[data-theme='dark']) .dashboard-container .stat-label,
-:global(:root[data-theme='dark']) .dashboard-container .focus-label,
-:global(:root[data-theme='dark']) .dashboard-container .focus-card small,
-:global(:root[data-theme='dark']) .dashboard-container .mtd-label,
-:global(:root[data-theme='dark']) .dashboard-container .insight-label,
-:global(:root[data-theme='dark']) .dashboard-container .insight-card small,
-:global(:root[data-theme='dark']) .dashboard-container .muted-label,
-:global(:root[data-theme='dark']) .dashboard-container .value-box small,
-:global(:root[data-theme='dark']) .dashboard-container .prog-info,
-:global(:root[data-theme='dark']) .dashboard-container .btn-sub,
-:global(:root[data-theme='dark']) .dashboard-container .sub-item span,
-:global(:root[data-theme='dark']) .dashboard-container .sync-card small,
-:global(:root[data-theme='dark']) .dashboard-container .chip-label,
-:global(:root[data-theme='dark']) .dashboard-container .active-visit-address {
+:root[data-theme='dark'] .dashboard-container .welcome-text,
+:root[data-theme='dark'] .dashboard-container .hero-date,
+:root[data-theme='dark'] .dashboard-container .hero-summary-label,
+:root[data-theme='dark'] .dashboard-container .hero-summary-subtitle,
+:root[data-theme='dark'] .dashboard-container .hero-meta-label,
+:root[data-theme='dark'] .dashboard-container .section-eyebrow,
+:root[data-theme='dark'] .dashboard-container .stat-label,
+:root[data-theme='dark'] .dashboard-container .focus-label,
+:root[data-theme='dark'] .dashboard-container .focus-card small,
+:root[data-theme='dark'] .dashboard-container .mtd-label,
+:root[data-theme='dark'] .dashboard-container .insight-label,
+:root[data-theme='dark'] .dashboard-container .insight-card small,
+:root[data-theme='dark'] .dashboard-container .muted-label,
+:root[data-theme='dark'] .dashboard-container .value-box small,
+:root[data-theme='dark'] .dashboard-container .prog-info,
+:root[data-theme='dark'] .dashboard-container .btn-sub,
+:root[data-theme='dark'] .dashboard-container .sub-item span,
+:root[data-theme='dark'] .dashboard-container .sync-card small,
+:root[data-theme='dark'] .dashboard-container .chip-label,
+:root[data-theme='dark'] .dashboard-container .active-visit-address {
   color: #b6c3d6 !important;
   opacity: 1 !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .user-name,
-:global(:root[data-theme='dark']) .dashboard-container .hero-summary-title,
-:global(:root[data-theme='dark']) .dashboard-container .section-title,
-:global(:root[data-theme='dark']) .dashboard-container .stat-value,
-:global(:root[data-theme='dark']) .dashboard-container .focus-card strong,
-:global(:root[data-theme='dark']) .dashboard-container .mtd-val,
-:global(:root[data-theme='dark']) .dashboard-container .insight-card strong,
-:global(:root[data-theme='dark']) .dashboard-container .perf-title,
-:global(:root[data-theme='dark']) .dashboard-container .target-block h3,
-:global(:root[data-theme='dark']) .dashboard-container .value-box p,
-:global(:root[data-theme='dark']) .dashboard-container .btn-top,
-:global(:root[data-theme='dark']) .dashboard-container .sync-card strong,
-:global(:root[data-theme='dark']) .dashboard-container .active-chip strong {
+:root[data-theme='dark'] .dashboard-container .user-name,
+:root[data-theme='dark'] .dashboard-container .hero-summary-title,
+:root[data-theme='dark'] .dashboard-container .section-title,
+:root[data-theme='dark'] .dashboard-container .stat-value,
+:root[data-theme='dark'] .dashboard-container .focus-card strong,
+:root[data-theme='dark'] .dashboard-container .mtd-val,
+:root[data-theme='dark'] .dashboard-container .insight-card strong,
+:root[data-theme='dark'] .dashboard-container .perf-title,
+:root[data-theme='dark'] .dashboard-container .target-block h3,
+:root[data-theme='dark'] .dashboard-container .value-box p,
+:root[data-theme='dark'] .dashboard-container .btn-top,
+:root[data-theme='dark'] .dashboard-container .sync-card strong,
+:root[data-theme='dark'] .dashboard-container .active-chip strong {
   color: #f8fafc !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .btn-logout,
-:global(:root[data-theme='dark']) .dashboard-container .btn-theme-mode,
-:global(:root[data-theme='dark']) .dashboard-container .role-badge,
-:global(:root[data-theme='dark']) .dashboard-container .status-pill {
+:root[data-theme='dark'] .dashboard-container .btn-logout,
+:root[data-theme='dark'] .dashboard-container .btn-theme-mode,
+:root[data-theme='dark'] .dashboard-container .role-badge,
+:root[data-theme='dark'] .dashboard-container .status-pill {
   background: #020617 !important;
   border: 1px solid rgba(96, 165, 250, 0.24) !important;
   color: #f8fafc !important;
   opacity: 1 !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .user-avatar {
+:root[data-theme='dark'] .dashboard-container .user-avatar {
   background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
   color: #eff6ff !important;
   box-shadow: 0 14px 28px rgba(37, 99, 235, 0.34) !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .highlight-blue,
-:global(:root[data-theme='dark']) .dashboard-container .highlight-green,
-:global(:root[data-theme='dark']) .dashboard-container .highlight-purple {
+:root[data-theme='dark'] .dashboard-container .highlight-blue,
+:root[data-theme='dark'] .dashboard-container .highlight-green,
+:root[data-theme='dark'] .dashboard-container .highlight-purple {
   background: linear-gradient(180deg, #030712 0%, #071426 100%) !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .target-achievement,
-:global(:root[data-theme='dark']) .dashboard-container .perf-period,
-:global(:root[data-theme='dark']) .dashboard-container .sync-chip {
+:root[data-theme='dark'] .dashboard-container .target-achievement,
+:root[data-theme='dark'] .dashboard-container .perf-period,
+:root[data-theme='dark'] .dashboard-container .sync-chip {
   background: rgba(37, 99, 235, 0.18) !important;
   border: 1px solid rgba(96, 165, 250, 0.28) !important;
   color: #93c5fd !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .prog-bar-bg {
+:root[data-theme='dark'] .dashboard-container .prog-bar-bg {
   background: #111827 !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .blue {
+:root[data-theme='dark'] .dashboard-container .blue {
   color: #93c5fd !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .green {
+:root[data-theme='dark'] .dashboard-container .green {
   color: #6ee7b7 !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .pull-to-refresh-layer {
+:root[data-theme='dark'] .dashboard-container .pull-to-refresh-layer {
   background: linear-gradient(180deg, rgba(37, 99, 235, 0.16), transparent) !important;
 }
 
-:global(:root[data-theme='dark']) .dashboard-container .refresh-content {
+:root[data-theme='dark'] .dashboard-container .refresh-content {
   color: #cbd5e1 !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container {
+:root[data-theme='light'] .dashboard-container {
   background: #f8fafc !important;
   color: #0f172a !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .hero-header {
+:root[data-theme='light'] .dashboard-container .hero-header {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
   border: 1px solid #e2e8f0 !important;
   border-top: none !important;
@@ -3307,115 +3254,115 @@ onMounted(async () => {
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06) !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .welcome-text,
-:global(:root[data-theme='light']) .dashboard-container .hero-date,
-:global(:root[data-theme='light']) .dashboard-container .hero-summary-label,
-:global(:root[data-theme='light']) .dashboard-container .hero-summary-subtitle,
-:global(:root[data-theme='light']) .dashboard-container .hero-meta-label,
-:global(:root[data-theme='light']) .dashboard-container .section-eyebrow,
-:global(:root[data-theme='light']) .dashboard-container .stat-label,
-:global(:root[data-theme='light']) .dashboard-container .mtd-label,
-:global(:root[data-theme='light']) .dashboard-container .insight-label,
-:global(:root[data-theme='light']) .dashboard-container .value-box small,
-:global(:root[data-theme='light']) .dashboard-container .prog-info,
-:global(:root[data-theme='light']) .dashboard-container .btn-sub,
-:global(:root[data-theme='light']) .dashboard-container .sub-item span,
-:global(:root[data-theme='light']) .dashboard-container .sync-card small,
-:global(:root[data-theme='light']) .dashboard-container .chip-label,
-:global(:root[data-theme='light']) .dashboard-container .active-visit-address {
+:root[data-theme='light'] .dashboard-container .welcome-text,
+:root[data-theme='light'] .dashboard-container .hero-date,
+:root[data-theme='light'] .dashboard-container .hero-summary-label,
+:root[data-theme='light'] .dashboard-container .hero-summary-subtitle,
+:root[data-theme='light'] .dashboard-container .hero-meta-label,
+:root[data-theme='light'] .dashboard-container .section-eyebrow,
+:root[data-theme='light'] .dashboard-container .stat-label,
+:root[data-theme='light'] .dashboard-container .mtd-label,
+:root[data-theme='light'] .dashboard-container .insight-label,
+:root[data-theme='light'] .dashboard-container .value-box small,
+:root[data-theme='light'] .dashboard-container .prog-info,
+:root[data-theme='light'] .dashboard-container .btn-sub,
+:root[data-theme='light'] .dashboard-container .sub-item span,
+:root[data-theme='light'] .dashboard-container .sync-card small,
+:root[data-theme='light'] .dashboard-container .chip-label,
+:root[data-theme='light'] .dashboard-container .active-visit-address {
   color: #64748b !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .user-name,
-:global(:root[data-theme='light']) .dashboard-container .hero-summary-title,
-:global(:root[data-theme='light']) .dashboard-container .section-title,
-:global(:root[data-theme='light']) .dashboard-container .stat-value,
-:global(:root[data-theme='light']) .dashboard-container .mtd-val,
-:global(:root[data-theme='light']) .dashboard-container .insight-card strong,
-:global(:root[data-theme='light']) .dashboard-container .perf-title,
-:global(:root[data-theme='light']) .dashboard-container .target-block h3,
-:global(:root[data-theme='light']) .dashboard-container .value-box p,
-:global(:root[data-theme='light']) .dashboard-container .btn-top,
-:global(:root[data-theme='light']) .dashboard-container .sync-card strong,
-:global(:root[data-theme='light']) .dashboard-container .active-chip strong {
+:root[data-theme='light'] .dashboard-container .user-name,
+:root[data-theme='light'] .dashboard-container .hero-summary-title,
+:root[data-theme='light'] .dashboard-container .section-title,
+:root[data-theme='light'] .dashboard-container .stat-value,
+:root[data-theme='light'] .dashboard-container .mtd-val,
+:root[data-theme='light'] .dashboard-container .insight-card strong,
+:root[data-theme='light'] .dashboard-container .perf-title,
+:root[data-theme='light'] .dashboard-container .target-block h3,
+:root[data-theme='light'] .dashboard-container .value-box p,
+:root[data-theme='light'] .dashboard-container .btn-top,
+:root[data-theme='light'] .dashboard-container .sync-card strong,
+:root[data-theme='light'] .dashboard-container .active-chip strong {
   color: #0f172a !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .hero-summary-card,
-:global(:root[data-theme='light']) .dashboard-container .hero-meta-card,
-:global(:root[data-theme='light']) .dashboard-container .active-visit-card,
-:global(:root[data-theme='light']) .dashboard-container .stat-card,
-:global(:root[data-theme='light']) .dashboard-container .focus-card,
-:global(:root[data-theme='light']) .dashboard-container .mtd-card,
-:global(:root[data-theme='light']) .dashboard-container .insight-panel,
-:global(:root[data-theme='light']) .dashboard-container .insight-card,
-:global(:root[data-theme='light']) .dashboard-container .performance-card,
-:global(:root[data-theme='light']) .dashboard-container .premium-card,
-:global(:root[data-theme='light']) .dashboard-container .premium-main-btn,
-:global(:root[data-theme='light']) .dashboard-container .sub-item,
-:global(:root[data-theme='light']) .dashboard-container .sync-panel,
-:global(:root[data-theme='light']) .dashboard-container .sync-card,
-:global(:root[data-theme='light']) .dashboard-container .value-box,
-:global(:root[data-theme='light']) .dashboard-container .active-chip {
+:root[data-theme='light'] .dashboard-container .hero-summary-card,
+:root[data-theme='light'] .dashboard-container .hero-meta-card,
+:root[data-theme='light'] .dashboard-container .active-visit-card,
+:root[data-theme='light'] .dashboard-container .stat-card,
+:root[data-theme='light'] .dashboard-container .focus-card,
+:root[data-theme='light'] .dashboard-container .mtd-card,
+:root[data-theme='light'] .dashboard-container .insight-panel,
+:root[data-theme='light'] .dashboard-container .insight-card,
+:root[data-theme='light'] .dashboard-container .performance-card,
+:root[data-theme='light'] .dashboard-container .premium-card,
+:root[data-theme='light'] .dashboard-container .premium-main-btn,
+:root[data-theme='light'] .dashboard-container .sub-item,
+:root[data-theme='light'] .dashboard-container .sync-panel,
+:root[data-theme='light'] .dashboard-container .sync-card,
+:root[data-theme='light'] .dashboard-container .value-box,
+:root[data-theme='light'] .dashboard-container .active-chip {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06) !important;
   color: #0f172a !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .highlight-blue,
-:global(:root[data-theme='light']) .dashboard-container .highlight-green,
-:global(:root[data-theme='light']) .dashboard-container .highlight-purple {
+:root[data-theme='light'] .dashboard-container .highlight-blue,
+:root[data-theme='light'] .dashboard-container .highlight-green,
+:root[data-theme='light'] .dashboard-container .highlight-purple {
   background: #ffffff !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .hero-summary-card {
+:root[data-theme='light'] .dashboard-container .hero-summary-card {
   border-radius: 16px !important;
   margin-top: 16px !important;
   padding: 14px !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .main-content {
+:root[data-theme='light'] .dashboard-container .main-content {
   margin-top: -22px !important;
   padding: 30px 16px 0 !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .kpi-section,
-:global(:root[data-theme='light']) .dashboard-container .menu-section,
-:global(:root[data-theme='light']) .dashboard-container .sync-panel {
+:root[data-theme='light'] .dashboard-container .kpi-section,
+:root[data-theme='light'] .dashboard-container .menu-section,
+:root[data-theme='light'] .dashboard-container .sync-panel {
   margin-bottom: 18px !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .btn-logout,
-:global(:root[data-theme='light']) .dashboard-container .btn-theme-mode,
-:global(:root[data-theme='light']) .dashboard-container .role-badge,
-:global(:root[data-theme='light']) .dashboard-container .status-pill {
+:root[data-theme='light'] .dashboard-container .btn-logout,
+:root[data-theme='light'] .dashboard-container .btn-theme-mode,
+:root[data-theme='light'] .dashboard-container .role-badge,
+:root[data-theme='light'] .dashboard-container .status-pill {
   background: #f8fafc !important;
   border: 1px solid #e2e8f0 !important;
   color: #0f172a !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .user-avatar {
+:root[data-theme='light'] .dashboard-container .user-avatar {
   background: #2563eb !important;
   color: #ffffff !important;
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22) !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .target-achievement,
-:global(:root[data-theme='light']) .dashboard-container .perf-period,
-:global(:root[data-theme='light']) .dashboard-container .sync-chip {
+:root[data-theme='light'] .dashboard-container .target-achievement,
+:root[data-theme='light'] .dashboard-container .perf-period,
+:root[data-theme='light'] .dashboard-container .sync-chip {
   background: #eff6ff !important;
   border: 1px solid #bfdbfe !important;
   color: #1d4ed8 !important;
 }
 
-:global(:root[data-theme='light']) .dashboard-container .sub-menu-grid,
-:global(:root[data-theme='light']) .dashboard-container .insight-grid,
-:global(:root[data-theme='light']) .dashboard-container .daily-grid {
+:root[data-theme='light'] .dashboard-container .sub-menu-grid,
+:root[data-theme='light'] .dashboard-container .insight-grid,
+:root[data-theme='light'] .dashboard-container .daily-grid {
   gap: 10px !important;
 }
 
@@ -3441,9 +3388,9 @@ onMounted(async () => {
 }
 
 /* Dashboard true-light pass: wins over older global dark/card rules in Android WebView. */
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container,
-:global(body[data-theme='light']) .dashboard-container,
-:global(:root[data-theme='light']) .dashboard-container {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container,
+body[data-theme='light'] .dashboard-container,
+:root[data-theme='light'] .dashboard-container {
   --dash-bg: #f8fafc;
   --dash-card: #ffffff;
   --dash-soft: #f1f5f9;
@@ -3469,62 +3416,62 @@ onMounted(async () => {
   -webkit-overflow-scrolling: touch !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-header,
-:global(body[data-theme='light']) .dashboard-container .hero-header,
-:global(:root[data-theme='light']) .dashboard-container .hero-header {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-header,
+body[data-theme='light'] .dashboard-container .hero-header,
+:root[data-theme='light'] .dashboard-container .hero-header {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
   border-color: var(--dash-border) !important;
   color: var(--dash-text) !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-summary-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-meta-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .active-visit-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .premium-main-btn,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .sub-item,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .stat-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .focus-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .mtd-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .insight-panel,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .insight-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .performance-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .premium-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .sync-panel,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .sync-card,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .value-box,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .active-chip,
-:global(body[data-theme='light']) .dashboard-container .hero-summary-card,
-:global(body[data-theme='light']) .dashboard-container .hero-meta-card,
-:global(body[data-theme='light']) .dashboard-container .active-visit-card,
-:global(body[data-theme='light']) .dashboard-container .premium-main-btn,
-:global(body[data-theme='light']) .dashboard-container .sub-item,
-:global(body[data-theme='light']) .dashboard-container .stat-card,
-:global(body[data-theme='light']) .dashboard-container .focus-card,
-:global(body[data-theme='light']) .dashboard-container .mtd-card,
-:global(body[data-theme='light']) .dashboard-container .insight-panel,
-:global(body[data-theme='light']) .dashboard-container .insight-card,
-:global(body[data-theme='light']) .dashboard-container .performance-card,
-:global(body[data-theme='light']) .dashboard-container .premium-card,
-:global(body[data-theme='light']) .dashboard-container .sync-panel,
-:global(body[data-theme='light']) .dashboard-container .sync-card,
-:global(body[data-theme='light']) .dashboard-container .value-box,
-:global(body[data-theme='light']) .dashboard-container .active-chip,
-:global(:root[data-theme='light']) .dashboard-container .hero-summary-card,
-:global(:root[data-theme='light']) .dashboard-container .hero-meta-card,
-:global(:root[data-theme='light']) .dashboard-container .active-visit-card,
-:global(:root[data-theme='light']) .dashboard-container .premium-main-btn,
-:global(:root[data-theme='light']) .dashboard-container .sub-item,
-:global(:root[data-theme='light']) .dashboard-container .stat-card,
-:global(:root[data-theme='light']) .dashboard-container .focus-card,
-:global(:root[data-theme='light']) .dashboard-container .mtd-card,
-:global(:root[data-theme='light']) .dashboard-container .insight-panel,
-:global(:root[data-theme='light']) .dashboard-container .insight-card,
-:global(:root[data-theme='light']) .dashboard-container .performance-card,
-:global(:root[data-theme='light']) .dashboard-container .premium-card,
-:global(:root[data-theme='light']) .dashboard-container .sync-panel,
-:global(:root[data-theme='light']) .dashboard-container .sync-card,
-:global(:root[data-theme='light']) .dashboard-container .value-box,
-:global(:root[data-theme='light']) .dashboard-container .active-chip {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-summary-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-meta-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .active-visit-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .premium-main-btn,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .sub-item,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .stat-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .focus-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .mtd-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .insight-panel,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .insight-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .performance-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .premium-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .sync-panel,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .sync-card,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .value-box,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .active-chip,
+body[data-theme='light'] .dashboard-container .hero-summary-card,
+body[data-theme='light'] .dashboard-container .hero-meta-card,
+body[data-theme='light'] .dashboard-container .active-visit-card,
+body[data-theme='light'] .dashboard-container .premium-main-btn,
+body[data-theme='light'] .dashboard-container .sub-item,
+body[data-theme='light'] .dashboard-container .stat-card,
+body[data-theme='light'] .dashboard-container .focus-card,
+body[data-theme='light'] .dashboard-container .mtd-card,
+body[data-theme='light'] .dashboard-container .insight-panel,
+body[data-theme='light'] .dashboard-container .insight-card,
+body[data-theme='light'] .dashboard-container .performance-card,
+body[data-theme='light'] .dashboard-container .premium-card,
+body[data-theme='light'] .dashboard-container .sync-panel,
+body[data-theme='light'] .dashboard-container .sync-card,
+body[data-theme='light'] .dashboard-container .value-box,
+body[data-theme='light'] .dashboard-container .active-chip,
+:root[data-theme='light'] .dashboard-container .hero-summary-card,
+:root[data-theme='light'] .dashboard-container .hero-meta-card,
+:root[data-theme='light'] .dashboard-container .active-visit-card,
+:root[data-theme='light'] .dashboard-container .premium-main-btn,
+:root[data-theme='light'] .dashboard-container .sub-item,
+:root[data-theme='light'] .dashboard-container .stat-card,
+:root[data-theme='light'] .dashboard-container .focus-card,
+:root[data-theme='light'] .dashboard-container .mtd-card,
+:root[data-theme='light'] .dashboard-container .insight-panel,
+:root[data-theme='light'] .dashboard-container .insight-card,
+:root[data-theme='light'] .dashboard-container .performance-card,
+:root[data-theme='light'] .dashboard-container .premium-card,
+:root[data-theme='light'] .dashboard-container .sync-panel,
+:root[data-theme='light'] .dashboard-container .sync-card,
+:root[data-theme='light'] .dashboard-container .value-box,
+:root[data-theme='light'] .dashboard-container .active-chip {
   background: var(--dash-card) !important;
   border-color: var(--dash-border) !important;
   color: var(--dash-text) !important;
@@ -3532,106 +3479,106 @@ onMounted(async () => {
   text-shadow: none !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .welcome-text,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-date,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-summary-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-summary-subtitle,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-meta-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .section-eyebrow,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .stat-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .focus-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .focus-card small,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .mtd-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .insight-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .insight-card small,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .muted-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .value-box small,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .prog-info,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .btn-sub,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .sub-item span,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .sync-card small,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .chip-label,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .active-visit-address,
-:global(body[data-theme='light']) .dashboard-container .welcome-text,
-:global(body[data-theme='light']) .dashboard-container .hero-date,
-:global(body[data-theme='light']) .dashboard-container .hero-summary-label,
-:global(body[data-theme='light']) .dashboard-container .hero-summary-subtitle,
-:global(body[data-theme='light']) .dashboard-container .hero-meta-label,
-:global(body[data-theme='light']) .dashboard-container .section-eyebrow,
-:global(body[data-theme='light']) .dashboard-container .stat-label,
-:global(body[data-theme='light']) .dashboard-container .focus-label,
-:global(body[data-theme='light']) .dashboard-container .focus-card small,
-:global(body[data-theme='light']) .dashboard-container .mtd-label,
-:global(body[data-theme='light']) .dashboard-container .insight-label,
-:global(body[data-theme='light']) .dashboard-container .insight-card small,
-:global(body[data-theme='light']) .dashboard-container .muted-label,
-:global(body[data-theme='light']) .dashboard-container .value-box small,
-:global(body[data-theme='light']) .dashboard-container .prog-info,
-:global(body[data-theme='light']) .dashboard-container .btn-sub,
-:global(body[data-theme='light']) .dashboard-container .sub-item span,
-:global(body[data-theme='light']) .dashboard-container .sync-card small,
-:global(body[data-theme='light']) .dashboard-container .chip-label,
-:global(body[data-theme='light']) .dashboard-container .active-visit-address {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .welcome-text,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-date,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-summary-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-summary-subtitle,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-meta-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .section-eyebrow,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .stat-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .focus-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .focus-card small,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .mtd-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .insight-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .insight-card small,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .muted-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .value-box small,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .prog-info,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .btn-sub,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .sub-item span,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .sync-card small,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .chip-label,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .active-visit-address,
+body[data-theme='light'] .dashboard-container .welcome-text,
+body[data-theme='light'] .dashboard-container .hero-date,
+body[data-theme='light'] .dashboard-container .hero-summary-label,
+body[data-theme='light'] .dashboard-container .hero-summary-subtitle,
+body[data-theme='light'] .dashboard-container .hero-meta-label,
+body[data-theme='light'] .dashboard-container .section-eyebrow,
+body[data-theme='light'] .dashboard-container .stat-label,
+body[data-theme='light'] .dashboard-container .focus-label,
+body[data-theme='light'] .dashboard-container .focus-card small,
+body[data-theme='light'] .dashboard-container .mtd-label,
+body[data-theme='light'] .dashboard-container .insight-label,
+body[data-theme='light'] .dashboard-container .insight-card small,
+body[data-theme='light'] .dashboard-container .muted-label,
+body[data-theme='light'] .dashboard-container .value-box small,
+body[data-theme='light'] .dashboard-container .prog-info,
+body[data-theme='light'] .dashboard-container .btn-sub,
+body[data-theme='light'] .dashboard-container .sub-item span,
+body[data-theme='light'] .dashboard-container .sync-card small,
+body[data-theme='light'] .dashboard-container .chip-label,
+body[data-theme='light'] .dashboard-container .active-visit-address {
   color: var(--dash-muted) !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .user-name,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-summary-title,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-meta-card strong,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .section-title,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .stat-value,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .focus-card strong,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .mtd-val,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .insight-card strong,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .perf-title,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .target-block h3,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .value-box p,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .btn-top,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .sync-card strong,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .active-chip strong,
-:global(body[data-theme='light']) .dashboard-container .user-name,
-:global(body[data-theme='light']) .dashboard-container .hero-summary-title,
-:global(body[data-theme='light']) .dashboard-container .hero-meta-card strong,
-:global(body[data-theme='light']) .dashboard-container .section-title,
-:global(body[data-theme='light']) .dashboard-container .stat-value,
-:global(body[data-theme='light']) .dashboard-container .focus-card strong,
-:global(body[data-theme='light']) .dashboard-container .mtd-val,
-:global(body[data-theme='light']) .dashboard-container .insight-card strong,
-:global(body[data-theme='light']) .dashboard-container .perf-title,
-:global(body[data-theme='light']) .dashboard-container .target-block h3,
-:global(body[data-theme='light']) .dashboard-container .value-box p,
-:global(body[data-theme='light']) .dashboard-container .btn-top,
-:global(body[data-theme='light']) .dashboard-container .sync-card strong,
-:global(body[data-theme='light']) .dashboard-container .active-chip strong {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .user-name,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-summary-title,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-meta-card strong,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .section-title,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .stat-value,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .focus-card strong,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .mtd-val,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .insight-card strong,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .perf-title,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .target-block h3,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .value-box p,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .btn-top,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .sync-card strong,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .active-chip strong,
+body[data-theme='light'] .dashboard-container .user-name,
+body[data-theme='light'] .dashboard-container .hero-summary-title,
+body[data-theme='light'] .dashboard-container .hero-meta-card strong,
+body[data-theme='light'] .dashboard-container .section-title,
+body[data-theme='light'] .dashboard-container .stat-value,
+body[data-theme='light'] .dashboard-container .focus-card strong,
+body[data-theme='light'] .dashboard-container .mtd-val,
+body[data-theme='light'] .dashboard-container .insight-card strong,
+body[data-theme='light'] .dashboard-container .perf-title,
+body[data-theme='light'] .dashboard-container .target-block h3,
+body[data-theme='light'] .dashboard-container .value-box p,
+body[data-theme='light'] .dashboard-container .btn-top,
+body[data-theme='light'] .dashboard-container .sync-card strong,
+body[data-theme='light'] .dashboard-container .active-chip strong {
   color: var(--dash-text) !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .btn-logout,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .btn-theme-mode,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .role-badge,
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .status-pill,
-:global(body[data-theme='light']) .dashboard-container .btn-logout,
-:global(body[data-theme='light']) .dashboard-container .btn-theme-mode,
-:global(body[data-theme='light']) .dashboard-container .role-badge,
-:global(body[data-theme='light']) .dashboard-container .status-pill {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .btn-logout,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .btn-theme-mode,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .role-badge,
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .status-pill,
+body[data-theme='light'] .dashboard-container .btn-logout,
+body[data-theme='light'] .dashboard-container .btn-theme-mode,
+body[data-theme='light'] .dashboard-container .role-badge,
+body[data-theme='light'] .dashboard-container .status-pill {
   background: var(--dash-soft) !important;
   border: 1px solid var(--dash-border) !important;
   color: var(--dash-text) !important;
 }
 
 /* Final dark contrast guard: keep dashboard crisp after global theme layers. */
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container,
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container * {
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container,
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container * {
   filter: none !important;
   mix-blend-mode: normal !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container,
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container,
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container :is(
   .hero-header,
   .main-content,
   .kpi-section,
@@ -3643,7 +3590,7 @@ onMounted(async () => {
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container :is(
   .user-name,
   .hero-summary-title,
   .hero-meta-card strong,
@@ -3663,7 +3610,7 @@ onMounted(async () => {
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container :is(
   .welcome-text,
   .hero-date,
   .hero-summary-label,
@@ -3689,7 +3636,7 @@ onMounted(async () => {
   opacity: 1 !important;
 }
 
-:global(html[data-theme='dark'] body[data-theme='dark']) .dashboard-container :is(
+html[data-theme='dark'] body[data-theme='dark'] .dashboard-container :is(
   .hero-summary-card,
   .hero-meta-card,
   .active-visit-card,
@@ -3714,9 +3661,9 @@ onMounted(async () => {
 
 /* Final light guard for hero meta cards: these sit on top of the hero and were
    still inheriting white text from the default dark hero styling in some builds. */
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-meta-card,
-:global(body[data-theme='light']) .dashboard-container .hero-meta-card,
-:global(:root[data-theme='light']) .dashboard-container .hero-meta-card {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-meta-card,
+body[data-theme='light'] .dashboard-container .hero-meta-card,
+:root[data-theme='light'] .dashboard-container .hero-meta-card {
   background: #ffffff !important;
   border-color: #e2e8f0 !important;
   color: #0f172a !important;
@@ -3725,17 +3672,17 @@ onMounted(async () => {
   backdrop-filter: none !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-meta-label,
-:global(body[data-theme='light']) .dashboard-container .hero-meta-label,
-:global(:root[data-theme='light']) .dashboard-container .hero-meta-label {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-meta-label,
+body[data-theme='light'] .dashboard-container .hero-meta-label,
+:root[data-theme='light'] .dashboard-container .hero-meta-label {
   color: #475569 !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
-:global(html[data-theme='light'] body[data-theme='light']) .dashboard-container .hero-meta-card strong,
-:global(body[data-theme='light']) .dashboard-container .hero-meta-card strong,
-:global(:root[data-theme='light']) .dashboard-container .hero-meta-card strong {
+html[data-theme='light'] body[data-theme='light'] .dashboard-container .hero-meta-card strong,
+body[data-theme='light'] .dashboard-container .hero-meta-card strong,
+:root[data-theme='light'] .dashboard-container .hero-meta-card strong {
   color: #0f172a !important;
   opacity: 1 !important;
   text-shadow: none !important;
