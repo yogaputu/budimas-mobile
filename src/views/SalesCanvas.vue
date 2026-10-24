@@ -929,7 +929,7 @@ const normalizeRows = (payload) => {
       uom1_factor: Number(item.uom1_factor || 1),
       uom2_factor: uom2Factor,
       uom3_factor: uom3Factor,
-      stock_gudang: Number(item.stock_gudang || 0),
+      stock_gudang: Number(item.stok_efektif ?? item.stock_gudang ?? 0),
       stock_canvas: Number(item.stock_canvas || 0),
       canvas_request_id: Number(item.canvas_request_id || 0),
       status_canvas: Number(item.status_canvas || 0),
@@ -959,7 +959,7 @@ const hasUomLevel = (item, level) => {
 };
 
 const getStock = (item) => mode.value === 'request'
-  ? Number(item.stock_gudang || 0)
+  ? Number(item.stok_efektif ?? item.stock_gudang ?? 0)
   : mode.value === 'order'
     ? Math.max(0, Number(item.available_order_qty_pcs || 0))
     : Number(item.stock_canvas || 0);

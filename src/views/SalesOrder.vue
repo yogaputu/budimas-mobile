@@ -105,7 +105,7 @@
                   {{ getCustomerRuleLabel(item) }}
                 </span>
                 <span v-if="item.StokReady != null" class="stock-chip">
-                  Stok Ready {{ formatNumber(item.StokReady) }} PCS
+                  Stok Efektif {{ formatNumber(item.stok_efektif ?? item.StokReady) }} PCS
                 </span>
                 <span v-if="Number(item.StokAkhir) > 0" class="stock-chip">
                   Stok toko {{ Math.floor(Number(item.StokAkhir) || 0) }}
@@ -379,8 +379,8 @@
             <strong>{{ formatNumber(selectedItemDetail.stok?.Suggestion || 0) }}</strong>
           </div>
           <div class="detail-box">
-            <span>Stok Ready Gudang (PCS)</span>
-            <strong>{{ selectedItemDetail.stok?.StokReady != null ? formatNumber(selectedItemDetail.stok.StokReady) : "Belum dimuat" }}</strong>
+            <span>Stok Efektif Gudang (PCS)</span>
+            <strong>{{ (selectedItemDetail.stok?.stok_efektif ?? selectedItemDetail.stok?.StokReady) != null ? formatNumber(selectedItemDetail.stok.stok_efektif ?? selectedItemDetail.stok.StokReady) : "Belum dimuat" }}</strong>
           </div>
           <div class="detail-box">
             <span>Stok toko</span>
@@ -677,6 +677,7 @@ const getStockAvailability = (entry) => {
   // raise an order-stock warning using the warehouse report transaction
   // balance for the selected branch.
   const rawValue = (
+    entry?.stok?.stok_efektif ??
     entry?.stok?.StokReady ??
     entry?.stok?.stok_ready ??
     entry?.stok?.StokWmsReady ??
